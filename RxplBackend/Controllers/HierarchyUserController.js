@@ -7,9 +7,9 @@ const Mr = require("../Models/MrModel");
 
 const ROLE_CONFIG = {
   TLM: { model: Tlm, idField: "TLMEmpID", nameField: "TLMName", parentRole: null, childrenField: "Slm" },
-  SLM: { model: Slm, idField: "SLMEmpID", nameField: "SLMName", parentRole: "TLM", parentField: "Slm", childrenField: "Flm" },
-  FLM: { model: Flm, idField: "FLMEmpID", nameField: "BDMName", parentRole: "SLM", parentField: "Flm", childrenField: "Mrs" },
-  MR:  { model: Mr,  idField: "MRID",     nameField: "USERNAME", parentRole: "FLM", parentField: "Mrs", childrenField: null },
+  SLM: { model: Slm, idField: "SLMEmpID", nameField: "SLMName", parentRole: "TLM", parentLinkField: "Slm" },
+  FLM: { model: Flm, idField: "FLMEmpID", nameField: "BDMName", parentRole: "SLM", parentLinkField: "Flm" },
+  MR:  { model: Mr,  idField: "MRID",     nameField: "USERNAME", parentRole: "FLM", parentLinkField: "Mrs" },
 };
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(String(value || ""));
@@ -85,19 +85,14 @@ const updateHierarchyUser = async (req, res) => {
       if (String(newParent._id) === String(user._id)) {
         return res.status(400).json({ success: false, message: "A user cannot be their own parent." });
       }
-      const linkedIds = newParent[config.childrenField] || [];
-      const alreadyLinked = linkedIds.some((linkedId) => String(linkedId) === String(user._id));
-      if (!alreadyLinked) {
-        // Prevent duplicate child references when the parent remains unchanged.
-        if (config.parentField) {
-          const parentModel = getByRole(config.parentRole).model;
-          oldParent = await parentModel.findOne({ [config.childrenField]: user._id });
-        }
-      }
+      const parentLinkField = config.parentLinkField;
+      oldParent = await getByRole(config.parentRole).model.findOne({
+        [parentLinkField]: user._id,
+      });
       if (oldParent && String(oldParent._id) !== String(newParent._id)) {
-        await oldParent.updateOne({ $pull: { [config.childrenField]: user._id } });
+        await oldParent.updateOne({ $pull: { [parentLinkField]: user._id } });
       }
-      await newParent.updateOne({ $addToSet: { [config.childrenField]: user._id } });
+      await newParent.updateOne({ $addToSet: { [parentLinkField]: user._id } });
     }
 
     await config.model.updateOne({ _id: user._id }, { $set: changes });
