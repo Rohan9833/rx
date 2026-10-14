@@ -479,8 +479,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     <>
       <aside
         id="logo-sidebar"
-        className={`fixed top-0 left-0 z-1 w-80 h-screen pt-2 transition-transform transform -translate-x-full bg-gradient-to-b from-customGradientButtonStart sm:from-customGradientStart to-customGradientButtonEnd sm:to-customGradientEnd text-white border-r border-gray-200 sm:translate-x-0 ${
-          isSidebarOpen ? "translate-x-0 z-[1] w-[250px]" : " "
+        className={`fixed top-0 left-0 z-1 w-[250px] max-w-[100vw] h-screen overflow-x-hidden overflow-y-auto pt-2 transition-transform transform -translate-x-full bg-gradient-to-b from-customGradientButtonStart sm:from-customGradientStart to-customGradientButtonEnd sm:to-customGradientEnd text-white border-r border-gray-200 sm:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0 z-[1]" : " "
         }`}
         aria-label="Sidebar"
       >
