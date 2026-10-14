@@ -136,10 +136,10 @@ const getHierarchyUsers = async (req, res) => {
     };
 
     const [tlms, slms, flms, mrs] = await Promise.all([
-      runQuery("TLM", Tlm.find().lean()),
-      runQuery("SLM", Slm.find().lean()),
-      runQuery("FLM", Flm.find().lean()),
-      runQuery("MR", Mr.find().lean()),
+      runQuery("TLM", Tlm.find().select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm").lean()),
+      runQuery("SLM", Slm.find().select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm").lean()),
+      runQuery("FLM", Flm.find().select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs").lean()),
+      runQuery("MR", Mr.find().select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT isActive status").lean()),
     ]);
 
     console.log(`[Hierarchy API][${requestId}] All queries completed; building hierarchy response`);
