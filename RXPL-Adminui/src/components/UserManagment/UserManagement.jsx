@@ -440,7 +440,7 @@ const UserManagement = () => {
         </div>
       </div>
 
-      <div className="um-stat-grid">
+      {viewMode === "active" && <div className="um-stat-grid">
         <div className="um-stat-card">
           <div className="um-stat-icon purple">
             <FaUsers />
@@ -486,7 +486,7 @@ const UserManagement = () => {
             <strong>{mrPagination.totalMRs || users.filter((user) => user.role === "MR").length}</strong>
           </div>
         </div>
-      </div>
+      </div>}
 
       {loadingUsers && <div className="um-loading-state">Loading users from the database…</div>}
       {loadError && <div className="um-load-error"><span>{loadError}</span><button type="button" className="um-secondary-btn" onClick={loadUsers}>Retry</button></div>}
