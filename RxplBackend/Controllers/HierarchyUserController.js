@@ -113,13 +113,36 @@ const updateHierarchyUser = async (req, res) => {
 
 
 const getHierarchyUsers = async (req, res) => {
+  const requestId = `hierarchy-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const startedAt = Date.now();
+
+  console.log(`[Hierarchy API][${requestId}] GET /api/hierarchy/users received`);
+  console.log(`[Hierarchy API][${requestId}] MongoDB readyState: ${mongoose.connection.readyState} (1=connected)`);
+
   try {
+    console.log(`[Hierarchy API][${requestId}] Starting TLM, SLM, FLM and MR queries...`);
+
+    const runQuery = async (role, query) => {
+      const queryStartedAt = Date.now();
+      console.log(`[Hierarchy API][${requestId}] ${role} query started`);
+      try {
+        const documents = await query;
+        console.log(`[Hierarchy API][${requestId}] ${role} query completed: ${documents.length} records in ${Date.now() - queryStartedAt}ms`);
+        return documents;
+      } catch (error) {
+        console.error(`[Hierarchy API][${requestId}] ${role} query FAILED after ${Date.now() - queryStartedAt}ms:`, error.message);
+        throw error;
+      }
+    };
+
     const [tlms, slms, flms, mrs] = await Promise.all([
-      Tlm.find().lean(),
-      Slm.find().lean(),
-      Flm.find().lean(),
-      Mr.find().lean(),
+      runQuery("TLM", Tlm.find().lean()),
+      runQuery("SLM", Slm.find().lean()),
+      runQuery("FLM", Flm.find().lean()),
+      runQuery("MR", Mr.find().lean()),
     ]);
+
+    console.log(`[Hierarchy API][${requestId}] All queries completed; building hierarchy response`);
 
     const parentByChild = new Map();
     const linkChildren = (parents, field, role) => {
@@ -168,12 +191,15 @@ const getHierarchyUsers = async (req, res) => {
       ...normalize(mrs, "MR"),
     ];
 
+    console.log(`[Hierarchy API][${requestId}] Responding with ${users.length} users in ${Date.now() - startedAt}ms`);
     return res.status(200).json({ success: true, users });
   } catch (error) {
+    console.error(`[Hierarchy API][${requestId}] Request FAILED after ${Date.now() - startedAt}ms:`, error);
     return res.status(500).json({
       success: false,
       message: "Failed to load hierarchy users.",
       error: error.message,
+      requestId,
     });
   }
 };
