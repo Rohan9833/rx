@@ -76,6 +76,7 @@ const TlmRoute = require("./Routes/TlmRoute");
 const SlmRoute = require("./Routes/SlmRoute");
 const FlmRoute = require("./Routes/FlmRoute");
 const MrRoute = require("./Routes/MrRoute");
+const HierarchyUserRoute = require("./Routes/HierarchyUserRoute");
 const LiveUserRoute = require("./Routes/LiveUserRoute");
 
 app.use("/api",AdminRoute);
@@ -83,6 +84,7 @@ app.use("/api",TlmRoute);
 app.use("/api",SlmRoute);
 app.use("/api",FlmRoute);
 app.use("/api",MrRoute);
+app.use("/api", HierarchyUserRoute);
 app.use("/api",LiveUserRoute);
 
 
