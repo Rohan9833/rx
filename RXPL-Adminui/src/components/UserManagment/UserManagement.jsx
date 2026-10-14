@@ -663,7 +663,7 @@ const UserManagement = () => {
                   >
                     {ROLES.map((role) => (
                       <option value={role} key={role}>
-                        {ROLE_LABELS[role]}{role !== "HO" ? ` (${role})` : ""}
+                        {ROLE_LABELS[role]} ({role})
                       </option>
                     ))}
                   </select>
@@ -695,8 +695,8 @@ const UserManagement = () => {
                     type="password"
                     value={form.password}
                     onChange={(event) => updateForm("password", event.target.value)}
-                    placeholder="Enter password"
-                    required={!editingId}
+                    placeholder="Leave blank to keep current password"
+                    required={!editingId}={!editingId}
                   />
                 </label>
 
@@ -731,23 +731,23 @@ const UserManagement = () => {
                 </label>
 
                 <label className="um-parent-field">
-                  {form.role === "HO" ? "Parent ID" : `Parent ${ROLES[ROLES.indexOf(form.role) - 1]} ID`}
+                  {form.role === "TLM" ? "Parent" : `Parent ${ROLES[ROLES.indexOf(form.role) - 1]} ID`}
                   <input
                     type="search"
                     className="um-parent-search"
                     value={parentSearch}
                     onChange={(event) => setParentSearch(event.target.value)}
                     placeholder="Search parent by ID or name"
-                    disabled={form.role === "HO"}
+                    disabled={form.role === "TLM"}
                   />
                   <select
                     value={form.managerId}
                     onChange={(event) => updateForm("managerId", event.target.value)}
                     disabled={form.role === "HO"}
-                    required={form.role !== "HO"}
+                    required={form.role !== "TLM"}
                   >
                     <option value="">
-                      {form.role === "HO" ? "Not applicable" : "Select parent"}
+                      {form.role === "TLM" ? "TLM users are at the top level" : "Select parent"}
                     </option>
                     {getEligibleManagers().filter((manager) => `${manager.username || ""} ${manager.name} ${manager.role}`.toLowerCase().includes(parentSearch.trim().toLowerCase())).map((manager) => (
                       <option key={manager.id} value={manager.id}>
