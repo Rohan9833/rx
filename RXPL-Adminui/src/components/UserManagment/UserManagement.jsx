@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import {
   FaUsers,
   FaUserTie,
@@ -18,73 +19,10 @@ import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import BackGroundImg from "../../assets/bg.png";
 
-const INITIAL_USERS = [
-  {
-    id: 1,
-    name: "Linux Admin",
-    username: "linuxadmin",
-    email: "admin@rxpl.com",
-    phone: "",
-    role: "HO",
-    managerId: null,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Amit Sharma",
-    username: "amit.tlm",
-    email: "amit@rxpl.com",
-    phone: "",
-    role: "TLM",
-    managerId: 1,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Rahul Patil",
-    username: "rahul.slm",
-    email: "rahul@rxpl.com",
-    phone: "",
-    role: "SLM",
-    managerId: 2,
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Suresh Kumar",
-    username: "suresh.flm",
-    email: "suresh@rxpl.com",
-    phone: "",
-    role: "FLM",
-    managerId: 3,
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Akash Dutta",
-    username: "akash.mr",
-    email: "akash@rxpl.com",
-    phone: "",
-    role: "MR",
-    managerId: 4,
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "Priya Singh",
-    username: "priya.mr",
-    email: "priya@rxpl.com",
-    phone: "",
-    role: "MR",
-    managerId: 4,
-    status: "Inactive",
-  },
-];
 
-const ROLES = ["HO", "TLM", "SLM", "FLM", "MR"];
+const ROLES = ["TLM", "SLM", "FLM", "MR"];
 
 const ROLE_LABELS = {
-  HO: "Head Office",
   TLM: "TLM",
   SLM: "SLM",
   FLM: "FLM",
@@ -110,7 +48,9 @@ const getAllowedManagerRoles = (role) => {
 
 const UserManagement = () => {
   const pageName = "User Management";
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -121,9 +61,28 @@ const UserManagement = () => {
   const [formError, setFormError] = useState("");
   const [parentSearch, setParentSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  const [expandedIds, setExpandedIds] = useState([1, 2, 3, 4]);
+  const [expandedIds, setExpandedIds] = useState([]);
 
-  const getUser = (id) => users.find((user) => user.id === Number(id));
+  const loadUsers = async () => {
+    setLoadingUsers(true);
+    setLoadError("");
+    try {
+      const response = await axios.get("http://localhost:7501/api/hierarchy/users");
+      if (!response.data?.success || !Array.isArray(response.data.users)) {
+        throw new Error(response.data?.message || "The server returned an invalid users response.");
+      }
+      setUsers(response.data.users);
+      setExpandedIds(response.data.users.filter((user) => user.role === "TLM").map((user) => user.id));
+    } catch (error) {
+      setLoadError(error.response?.data?.message || error.message || "Could not load users from the server.");
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => { loadUsers(); }, []);
+
+  const getUser = (id) => users.find((user) => String(user.id) === String(id));
 
   const getManagerName = (managerId) => {
     if (!managerId) return "—";
@@ -166,7 +125,7 @@ const UserManagement = () => {
     setEditingId(user.id);
     setForm({
       role: user.role,
-      userId: user.username || "",
+      userId: user.userId || user.username || "",
       name: user.name,
       password: user.password || "",
       hq: user.hq || "",
@@ -205,7 +164,7 @@ const UserManagement = () => {
 
     return users.filter((user) => {
       if (!allowedRoles.includes(user.role)) return false;
-      if (user.id === editingId) return false;
+      if (String(user.id) === String(editingId)) return false;
 
       // Do not allow a user to report to one of their own descendants.
       if (editingId && isDescendant(user.id, editingId)) return false;
@@ -216,88 +175,67 @@ const UserManagement = () => {
 
   const isDescendant = (candidateId, parentId) => {
     const children = users.filter(
-      (user) => Number(user.managerId) === Number(parentId),
+      (user) => String(user.managerId) === String(parentId),
     );
 
     return children.some(
       (child) =>
-        child.id === Number(candidateId) || isDescendant(candidateId, child.id),
+        String(child.id) === String(candidateId) || isDescendant(candidateId, child.id),
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!editingId) {
+      setFormError("Creating new accounts is not connected in this hierarchy editor yet. Select an existing TLM, SLM, FLM, or MR to edit.");
+      return;
+    }
 
     const name = form.name.trim();
     const userId = form.userId.trim();
-    const password = form.password.trim();
-
-    if (!name || !userId || !password || !form.hq.trim() || !form.region.trim() || !form.zone.trim()) {
-      setFormError("Please complete all required account and location details.");
+    if (!name || !userId || !form.hq.trim() || !form.zone.trim() || (form.role !== "TLM" && !form.region.trim())) {
+      setFormError("Please complete the required ID, name, HQ, zone, and region fields.");
       return;
     }
 
     const duplicateUserId = users.some(
-      (user) =>
-        String(user.username || "").toLowerCase() === userId.toLowerCase() &&
-        user.id !== editingId,
+      (user) => String(user.userId || user.username || "").toLowerCase() === userId.toLowerCase()
+        && String(user.id) !== String(editingId),
     );
-
     if (duplicateUserId) {
       setFormError("This ID is already in use.");
       return;
     }
 
-    const managerId = form.managerId ? Number(form.managerId) : null;
+    const managerId = form.role === "TLM" ? null : form.managerId;
     const allowedRoles = getAllowedManagerRoles(form.role);
-
-    if (managerId) {
+    if (form.role !== "TLM") {
       const manager = getUser(managerId);
-
-      if (
-        !manager ||
-        !allowedRoles.includes(manager.role) ||
-        manager.id === editingId ||
-        (editingId && isDescendant(managerId, editingId))
-      ) {
+      if (!manager || !allowedRoles.includes(manager.role) || String(manager.id) === String(editingId)
+        || isDescendant(managerId, editingId)) {
         setFormError("Please select a valid reporting manager.");
         return;
       }
     }
 
-    if (form.role !== "HO" && !managerId) {
-      setFormError("Please select a reporting manager for this role.");
-      return;
+    try {
+      setFormError("");
+      await axios.put(`http://localhost:7501/api/hierarchy/users/${form.role}/${editingId}`, {
+        userId,
+        name,
+        password: form.password,
+        hq: form.hq.trim(),
+        region: form.region.trim(),
+        zone: form.zone.trim(),
+        businessUnit: form.businessUnit || "",
+        parentId: managerId,
+      });
+      await loadUsers();
+      closeModal();
+    } catch (error) {
+      setFormError(error.response?.data?.message || error.message || "Failed to save user changes.");
     }
-
-    const userData = {
-      name,
-      username: userId,
-      password,
-      hq: form.hq.trim(),
-      region: form.region.trim(),
-      zone: form.zone.trim(),
-      role: form.role,
-      managerId,
-      status: form.status,
-    };
-
-    if (editingId) {
-      setUsers((previous) =>
-        previous.map((user) =>
-          user.id === editingId ? { ...user, ...userData } : user,
-        ),
-      );
-    } else {
-      const newUser = {
-        id: Math.max(0, ...users.map((user) => user.id)) + 1,
-        ...userData,
-      };
-
-      setUsers((previous) => [...previous, newUser]);
-    }
-
-    closeModal();
   };
 
   const confirmDelete = () => {
@@ -305,7 +243,7 @@ const UserManagement = () => {
 
     // Prevent deleting a manager while they still have direct reports.
     const hasReports = users.some(
-      (user) => Number(user.managerId) === Number(deleteId),
+      (user) => String(user.managerId) === String(deleteId),
     );
 
     if (hasReports) {
@@ -316,7 +254,6 @@ const UserManagement = () => {
       return;
     }
 
-    setUsers((previous) => previous.filter((user) => user.id !== deleteId));
     setDeleteId(null);
   };
 
@@ -330,7 +267,7 @@ const UserManagement = () => {
 
   const renderTree = (managerId, depth = 0, visited = new Set()) => {
     const children = users.filter(
-      (user) => Number(user.managerId) === Number(managerId),
+      (user) => String(user.managerId) === String(managerId),
     );
 
     return children.map((user) => {
@@ -340,7 +277,7 @@ const UserManagement = () => {
       nextVisited.add(user.id);
 
       const hasChildren = users.some(
-        (item) => Number(item.managerId) === user.id,
+        (item) => String(item.managerId) === String(user.id),
       );
       const expanded = expandedIds.includes(user.id);
 
@@ -469,7 +406,7 @@ const UserManagement = () => {
             <strong>
               {
                 users.filter((user) =>
-                  ["HO", "TLM", "SLM", "FLM"].includes(user.role),
+                  ["TLM", "SLM", "FLM"].includes(user.role),
                 ).length
               }
             </strong>
@@ -487,6 +424,8 @@ const UserManagement = () => {
         </div>
       </div>
 
+      {loadingUsers && <div className="um-loading-state">Loading users from the database…</div>}
+      {loadError && <div className="um-load-error"><span>{loadError}</span><button type="button" className="um-secondary-btn" onClick={loadUsers}>Retry</button></div>}
       <div className="um-main-card">
         <div className="um-tabs">
           <button
@@ -631,8 +570,8 @@ const UserManagement = () => {
                           <button
                             type="button"
                             className="um-icon-btn delete"
-                            title="Delete user"
-                            onClick={() => setDeleteId(user.id)}
+                            title="Delete is not available in this editor"
+                            disabled
                           >
                             <FaTrash />
                           </button>
@@ -667,34 +606,9 @@ const UserManagement = () => {
             </div>
 
             <div className="um-tree">
-              {users
-                .filter((user) => user.role === "HO" && !user.managerId)
-                .map((headOffice) => (
-                  <div className="um-tree-root" key={headOffice.id}>
-                    <div className="um-tree-node um-tree-root-node">
-                      <div className="um-tree-avatar root-avatar">
-                        <FaUserShield />
-                      </div>
-                      <div className="um-tree-user">
-                        <strong>{headOffice.name}</strong>
-                        <span>{headOffice.username}</span>
-                      </div>
-                      <span className="um-role-badge role-ho">HO</span>
-                      <button
-                        type="button"
-                        className="um-icon-btn"
-                        title="Edit user"
-                        onClick={() => openEditModal(headOffice)}
-                      >
-                        <FaEdit />
-                      </button>
-                    </div>
+              {renderTree(null, 0, new Set())}
 
-                    {renderTree(headOffice.id, 0, new Set([headOffice.id]))}
-                  </div>
-                ))}
-
-              {users.some((user) => user.role !== "HO" && !user.managerId) && (
+              {users.some((user) => user.role !== "TLM" && !user.managerId) && (
                 <div className="um-unassigned">
                   Some users do not have a reporting manager assigned.
                 </div>
