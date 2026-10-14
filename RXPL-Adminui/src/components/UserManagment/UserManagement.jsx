@@ -409,10 +409,10 @@ const UserManagement = () => {
 
   return (
     <>
-      <div className="relative grid grid-cols-1 sm:grid-cols-[320px_minmax(0,1fr)] min-h-screen w-full max-w-full overflow-x-hidden">
+      <div className="relative block min-h-screen w-full max-w-full overflow-x-hidden">
         <Sidebar />
         <div
-          className="w-full min-w-0 max-w-full z-1 bg-white relative sm:col-start-2 sm:col-end-3 sm:row-start-1 min-h-screen overflow-x-hidden"
+          className="relative z-1 min-h-screen w-full min-w-0 max-w-full overflow-x-hidden bg-white sm:ml-[320px] sm:w-[calc(100%-320px)]"
           style={{ borderRadius: "40px" }}
         >
           <div className="h-[100px] mb-[-20px]">
@@ -423,7 +423,7 @@ const UserManagement = () => {
               backgroundImage: `url(${BackGroundImg})`,
               backgroundBlendMode: "overlay",
             }}
-            className="border-pink-500 border-2 bg-cover bg-no-repeat mx-auto max-w-screen relative"
+            className="relative mx-auto w-full min-w-0 max-w-full overflow-x-hidden bg-cover bg-no-repeat"
           >
             <div className="rounded-2xl shadow-md min-h-[calc(100vh-100px)]">
               <div className="user-management-page">
