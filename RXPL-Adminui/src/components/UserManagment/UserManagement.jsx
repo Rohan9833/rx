@@ -409,7 +409,7 @@ const UserManagement = () => {
 
   return (
     <>
-      <div className="relative block min-h-screen w-full max-w-full">
+      <div className="um-page-shell relative block min-h-screen w-full max-w-full">
         <Sidebar />
         <div
           className="um-layout-content relative z-1 min-h-screen w-full min-w-0 max-w-full overflow-x-hidden bg-white"
