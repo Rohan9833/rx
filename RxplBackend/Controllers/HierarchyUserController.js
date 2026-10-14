@@ -157,7 +157,7 @@ const getHierarchyUsers = async (req, res) => {
         managerId: parent ? parent.id : null,
         managerRole: parent ? parent.role : null,
         managerName: parent ? parent.name : "",
-        status: doc.Status || doc.status || (doc.isActive === false ? "Inactive" : "Active"),
+        status: doc.status || (doc.isActive === true ? "Active" : doc.isActive === false ? "Inactive" : "Not tracked"),
       };
     });
 
