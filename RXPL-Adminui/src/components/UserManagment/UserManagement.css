@@ -1085,3 +1085,31 @@
     padding: 12px 14px;
   }
 }
+
+/* Actions in the User Management page header. */
+.um-page-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.um-page-header-actions .um-secondary-btn,
+.um-page-header-actions .um-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 620px) {
+  .um-page-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .um-page-header-actions button {
+    flex: 1;
+  }
+}
