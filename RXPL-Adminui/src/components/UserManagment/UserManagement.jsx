@@ -499,20 +499,14 @@ const UserManagement = () => {
                 )}
               </div>
 
+              <div className="um-role-toggle" role="group" aria-label="Choose one user role">
+                {ROLES.map((role) => (
+                  <button type="button" key={role} className={roleFilter === role ? "active" : ""} aria-pressed={roleFilter === role} onClick={() => setRoleFilter(role)}>
+                    {ROLE_LABELS[role]}
+                  </button>
+                ))}
+              </div>
               <div className="um-filters">
-                <select
-                  value={roleFilter}
-                  onChange={(event) => setRoleFilter(event.target.value)}
-                  aria-label="Filter by role"
-                >
-                  <option value="All">All Roles</option>
-                  {ROLES.map((role) => (
-                    <option value={role} key={role}>
-                      {ROLE_LABELS[role]}
-                    </option>
-                  ))}
-                </select>
-
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value)}
@@ -528,7 +522,7 @@ const UserManagement = () => {
 
             <div className="um-table-info">
               <span>
-                Showing <strong>{filteredUsers.length}</strong> loaded users; <strong>{mrPagination.totalMRs}</strong> MRs in total
+                Showing <strong>{filteredUsers.length}</strong> {roleFilter} users
               </span>
             </div>
 
@@ -547,7 +541,7 @@ const UserManagement = () => {
                 </thead>
 
                 <tbody>
-                  {filteredUsers.map((user) => (
+                  {paginatedUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
                         <div className="um-user-cell">
@@ -610,7 +604,7 @@ const UserManagement = () => {
                     </tr>
                   ))}
 
-                  {filteredUsers.length === 0 && (
+                  {paginatedUsers.length === 0 && (
                     <tr>
                       <td colSpan="7">
                         <div className="um-empty-state">
