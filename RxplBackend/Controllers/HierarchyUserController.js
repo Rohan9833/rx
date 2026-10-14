@@ -222,9 +222,9 @@ const getHierarchyUsers = async (req, res) => {
     const mrSkip = (mrPage - 1) * mrLimit;
 
     const [tlms, slms, flms, mrs, totalMRs] = await Promise.all([
-      runQuery("TLM", Tlm.find().select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm").lean()),
-      runQuery("SLM", Slm.find().select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm").lean()),
-      runQuery("FLM", Flm.find().select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs").lean()),
+      runQuery("TLM", Tlm.find().select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm isActive").lean()),
+      runQuery("SLM", Slm.find().select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm isActive").lean()),
+      runQuery("FLM", Flm.find().select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs isActive").lean()),
       runQuery("MR", Mr.find().sort({ _id: 1 }).skip(mrSkip).limit(mrLimit).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT isActive status").lean()),
       runQuery("MR count", Mr.countDocuments()),
     ]);
