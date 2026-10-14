@@ -19,6 +19,8 @@ import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import BackGroundImg from "../../assets/bg.png";
 
+const API_BASE_URL = `http://${window.location.hostname}:7501/api`;
+
 
 const ROLES = ["TLM", "SLM", "FLM", "MR"];
 
@@ -67,7 +69,7 @@ const UserManagement = () => {
     setLoadingUsers(true);
     setLoadError("");
     try {
-      const response = await axios.get("http://localhost:7501/api/hierarchy/users");
+      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`);
       if (!response.data?.success || !Array.isArray(response.data.users)) {
         throw new Error(response.data?.message || "The server returned an invalid users response.");
       }
@@ -221,7 +223,7 @@ const UserManagement = () => {
 
     try {
       setFormError("");
-      await axios.put(`http://localhost:7501/api/hierarchy/users/${form.role}/${editingId}`, {
+      await axios.put(`${API_BASE_URL}/hierarchy/users/${form.role}/${editingId}`, {
         userId,
         name,
         password: form.password,
