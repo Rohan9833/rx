@@ -11,6 +11,7 @@ const flmModel = new mongoose.Schema(
       type: String,
       required: false,
     },
+    isActive: { type: Boolean, default: true },
     BDMName: {
       type: String,
       required: false,
