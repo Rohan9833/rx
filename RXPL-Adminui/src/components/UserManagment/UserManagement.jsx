@@ -662,6 +662,7 @@ const UserManagement = () => {
                   <select
                     value={form.role}
                     onChange={(event) => updateForm("role", event.target.value)}
+                    disabled={Boolean(editingId)}
                   >
                     {ROLES.map((role) => (
                       <option value={role} key={role}>
@@ -698,7 +699,7 @@ const UserManagement = () => {
                     value={form.password}
                     onChange={(event) => updateForm("password", event.target.value)}
                     placeholder="Leave blank to keep current password"
-                    required={!editingId}={!editingId}
+                    required={!editingId}
                   />
                 </label>
 
@@ -713,12 +714,12 @@ const UserManagement = () => {
                 </label>
 
                 <label>
-                  Region <span>*</span>
+                  Region {form.role !== "TLM" && <span>*</span>}
                   <input
                     value={form.region}
                     onChange={(event) => updateForm("region", event.target.value)}
                     placeholder="Region"
-                    required
+                    required={form.role !== "TLM"}
                   />
                 </label>
 
@@ -745,7 +746,7 @@ const UserManagement = () => {
                   <select
                     value={form.managerId}
                     onChange={(event) => updateForm("managerId", event.target.value)}
-                    disabled={form.role === "HO"}
+                    disabled={form.role === "TLM"}
                     required={form.role !== "TLM"}
                   >
                     <option value="">
