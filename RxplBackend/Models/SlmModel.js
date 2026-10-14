@@ -11,6 +11,7 @@ const slmSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    isActive: { type: Boolean, default: true },
     SLMName: {
       type: String,
       required: false,
