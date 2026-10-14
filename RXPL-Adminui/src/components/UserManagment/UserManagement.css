@@ -805,27 +805,31 @@
 }
 
 
-/* This page alone accounts for the fixed sidebar; avoid adding its width to the viewport. */
+/* Keep horizontal overflow isolated to this page, not the document or shared sidebar. */
+.um-page-shell {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
+}
+
 .um-layout-content {
   position: relative;
   left: 0;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  margin-left: 0;
-  overflow-x: hidden;
+  margin: 0;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 
 @media (min-width: 640px) {
   .um-layout-content {
-    position: absolute;
-    top: 0;
-    left: 320px;
-    right: 0;
-    width: auto;
+    position: relative;
+    left: auto;
+    width: calc(100% - 320px);
     max-width: calc(100% - 320px);
-    margin-left: 0;
+    margin-left: 320px;
   }
 }
 
