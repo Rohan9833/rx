@@ -618,11 +618,18 @@ const UserManagement = () => {
                 </tbody>
               </table>
             </div>
-            {mrPagination.hasMoreMRs && (
+            <div className="um-pagination-controls">
+              <span>Page {tablePage} of {tablePageCount} · {filteredUsers.length} {roleFilter} users</span>
+              <div className="um-pagination-buttons">
+                <button type="button" className="um-secondary-btn" onClick={() => setTablePage((page) => Math.max(1, page - 1))} disabled={tablePage <= 1}>Previous</button>
+                <button type="button" className="um-secondary-btn" onClick={() => setTablePage((page) => Math.min(tablePageCount, page + 1))} disabled={tablePage >= tablePageCount}>Next</button>
+              </div>
+            </div>
+            {roleFilter === "MR" && mrPagination.hasMoreMRs && (
               <div className="um-pagination-controls">
                 <span>Loaded {users.filter((user) => user.role === "MR").length} of {mrPagination.totalMRs} medical representatives</span>
                 <button type="button" className="um-secondary-btn" onClick={loadMoreMrs} disabled={loadingMoreMrs}>
-                  {loadingMoreMrs ? "Loading..." : "Next 50 MRs"}
+                  {loadingMoreMrs ? "Loading..." : "Load Next 50 MRs"}
                 </button>
               </div>
             )}
