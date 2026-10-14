@@ -52,6 +52,8 @@ const UserManagement = () => {
   const pageName = "User Management";
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadingMoreMrs, setLoadingMoreMrs] = useState(false);
+  const [mrPagination, setMrPagination] = useState({ mrPage: 1, mrLimit: 50, totalMRs: 0, totalMRPages: 0, hasMoreMRs: false });
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
@@ -69,11 +71,12 @@ const UserManagement = () => {
     setLoadingUsers(true);
     setLoadError("");
     try {
-      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`);
+      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: 1, mrLimit: 50 } });
       if (!response.data?.success || !Array.isArray(response.data.users)) {
         throw new Error(response.data?.message || "The server returned an invalid users response.");
       }
       setUsers(response.data.users);
+      setMrPagination(response.data.pagination || { mrPage: 1, mrLimit: 50, totalMRs: response.data.users.filter((user) => user.role === "MR").length, totalMRPages: 1, hasMoreMRs: false });
       setExpandedIds(response.data.users.filter((user) => user.role === "TLM").map((user) => user.id));
     } catch (error) {
       setLoadError(error.response?.data?.message || error.message || "Could not load users from the server.");
@@ -83,6 +86,26 @@ const UserManagement = () => {
   };
 
   useEffect(() => { loadUsers(); }, []);
+
+  const loadMoreMrs = async () => {
+    if (loadingMoreMrs || !mrPagination.hasMoreMRs) return;
+    setLoadingMoreMrs(true);
+    setLoadError("");
+    try {
+      const nextPage = mrPagination.mrPage + 1;
+      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: nextPage, mrLimit: mrPagination.mrLimit || 50 } });
+      if (!response.data?.success || !Array.isArray(response.data.users)) {
+        throw new Error(response.data?.message || "The server returned an invalid users response.");
+      }
+      const nextMrs = response.data.users.filter((user) => user.role === "MR");
+      setUsers((previous) => [...previous.filter((user) => user.role !== "MR"), ...previous.filter((user) => user.role === "MR"), ...nextMrs]);
+      setMrPagination(response.data.pagination || { ...mrPagination, mrPage: nextPage, hasMoreMRs: false });
+    } catch (error) {
+      setLoadError(error.response?.data?.message || error.message || "Could not load more medical representatives.");
+    } finally {
+      setLoadingMoreMrs(false);
+    }
+  };
 
   const getUser = (id) => users.find((user) => String(user.id) === String(id));
 
@@ -385,7 +408,7 @@ const UserManagement = () => {
           </div>
           <div>
             <span>Total Users</span>
-            <strong>{users.length}</strong>
+            <strong>{users.length - users.filter((user) => user.role === "MR").length + mrPagination.totalMRs}</strong>
           </div>
         </div>
 
@@ -421,7 +444,7 @@ const UserManagement = () => {
           </div>
           <div>
             <span>Medical Representatives</span>
-            <strong>{users.filter((user) => user.role === "MR").length}</strong>
+            <strong>{mrPagination.totalMRs || users.filter((user) => user.role === "MR").length}</strong>
           </div>
         </div>
       </div>
@@ -500,8 +523,7 @@ const UserManagement = () => {
 
             <div className="um-table-info">
               <span>
-                Showing <strong>{filteredUsers.length}</strong> of{" "}
-                <strong>{users.length}</strong> users
+                Showing <strong>{filteredUsers.length}</strong> loaded users; <strong>{mrPagination.totalMRs}</strong> MRs in total
               </span>
             </div>
 
@@ -597,6 +619,14 @@ const UserManagement = () => {
                 </tbody>
               </table>
             </div>
+            {mrPagination.hasMoreMRs && (
+              <div className="um-pagination-controls">
+                <span>Loaded {users.filter((user) => user.role === "MR").length} of {mrPagination.totalMRs} medical representatives</span>
+                <button type="button" className="um-secondary-btn" onClick={loadMoreMrs} disabled={loadingMoreMrs}>
+                  {loadingMoreMrs ? "Loading..." : "Next 50 MRs"}
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <div className="um-hierarchy">
@@ -605,7 +635,7 @@ const UserManagement = () => {
                 <h3>Organization Hierarchy</h3>
                 <p>Expand a manager to view their direct reports and teams.</p>
               </div>
-              <span>{users.length} users</span>
+              <span>{users.length - users.filter((user) => user.role === "MR").length + mrPagination.totalMRs} users</span>
             </div>
 
             <div className="um-tree">
@@ -617,6 +647,14 @@ const UserManagement = () => {
                 </div>
               )}
             </div>
+            {mrPagination.hasMoreMRs && (
+              <div className="um-pagination-controls">
+                <span>Loaded {users.filter((user) => user.role === "MR").length} of {mrPagination.totalMRs} medical representatives</span>
+                <button type="button" className="um-secondary-btn" onClick={loadMoreMrs} disabled={loadingMoreMrs}>
+                  {loadingMoreMrs ? "Loading..." : "Next 50 MRs"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
