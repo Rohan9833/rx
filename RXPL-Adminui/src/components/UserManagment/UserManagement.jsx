@@ -421,14 +421,22 @@ const UserManagement = () => {
       <div className="um-page-header">
         <div>
           <div className="um-breadcrumb">Administration / Users</div>
-          <h1>User Management</h1>
-          <p>Manage users, reporting relationships, and account status.</p>
+          <h1>{viewMode === "inactive" ? "Inactive Users" : "User Management"}</h1>
+          <p>{viewMode === "inactive" ? "Review inactive accounts and reactivate users when needed." : "Manage active users, reporting relationships, and account status."}</p>
         </div>
 
-        <button type="button" className="um-primary-btn" onClick={openAddModal}>
-          <FaUserPlus />
-          <span>Add User</span>
-        </button>
+        <div className="um-page-header-actions">
+          <button type="button" className="um-secondary-btn" onClick={() => switchView(viewMode === "active" ? "inactive" : "active")}>
+            <FaUserCheck />
+            <span>{viewMode === "active" ? "View Inactive Users" : "Back to Active Users"}</span>
+          </button>
+          {viewMode === "active" && (
+            <button type="button" className="um-primary-btn" onClick={openAddModal}>
+              <FaUserPlus />
+              <span>Add User</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="um-stat-grid">
@@ -492,14 +500,16 @@ const UserManagement = () => {
             Users
           </button>
 
-          <button
-            type="button"
-            className={activeTab === "hierarchy" ? "active" : ""}
-            onClick={() => setActiveTab("hierarchy")}
-          >
-            <FaSitemap />
-            Hierarchy
-          </button>
+          {viewMode === "active" && (
+            <button
+              type="button"
+              className={activeTab === "hierarchy" ? "active" : ""}
+              onClick={() => setActiveTab("hierarchy")}
+            >
+              <FaSitemap />
+              Hierarchy
+            </button>
+          )}
         </div>
 
         {activeTab === "users" ? (
