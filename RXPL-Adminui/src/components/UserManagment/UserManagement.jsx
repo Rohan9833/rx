@@ -657,7 +657,7 @@ const UserManagement = () => {
                 <button type="button" className="um-secondary-btn" onClick={() => setTablePage((page) => Math.min(tablePageCount, page + 1))} disabled={tablePage >= tablePageCount}>Next</button>
               </div>
             </div>
-            {roleFilter === "MR" && mrPagination.hasMoreMRs && (
+            {(roleFilter === "MR" || (viewMode === "inactive" && roleFilter === "All")) && mrPagination.hasMoreMRs && (
               <div className="um-pagination-controls">
                 <span>Loaded {users.filter((user) => user.role === "MR").length} of {mrPagination.totalMRs} medical representatives</span>
                 <button type="button" className="um-secondary-btn" onClick={loadMoreMrs} disabled={loadingMoreMrs}>
