@@ -287,4 +287,42 @@ const getHierarchyUsers = async (req, res) => {
   }
 };
 
-module.exports = { getHierarchyUsers, updateHierarchyUser };
+const createHierarchyUser = async (req, res) => {
+  try {
+    const role = String(req.body?.role || "").toUpperCase();
+    const config = getByRole(role);
+    if (!config) return res.status(400).json({ success: false, message: "Role must be TLM, SLM, FLM, or MR." });
+    const body = req.body || {};
+    const userId = String(body.userId || "").trim();
+    const name = String(body.name || "").trim();
+    const password = String(body.password || "");
+    const hq = String(body.hq || "").trim();
+    const region = String(body.region || "").trim();
+    const zone = String(body.zone || "").trim();
+    const businessUnit = String(body.businessUnit || "").trim();
+    if (!userId || !name || !password || !hq || !zone || (role !== "TLM" && !region)) {
+      return res.status(400).json({ success: false, message: "Please provide ID, name, password, HQ, zone, and region where required." });
+    }
+    const duplicate = await config.model.findOne({ [config.idField]: userId }).select("_id");
+    if (duplicate) return res.status(409).json({ success: false, message: "That user ID is already in use." });
+    const data = { [config.idField]: userId, [config.nameField]: name, [role === "MR" ? "PASSWORD" : "Password"]: password, HQ: hq, ZONE: zone, BUSINESSUNIT: businessUnit };
+    if (role !== "TLM") data.REGION = region;
+    if (role === "MR") data.isActive = body.status !== "Inactive";
+    let parent = null;
+    if (config.parentRole) {
+      const parentId = String(body.parentId || "");
+      if (!isValidObjectId(parentId)) return res.status(400).json({ success: false, message: "Please select a valid parent manager." });
+      const parentConfig = getByRole(config.parentRole);
+      parent = await parentConfig.model.findById(parentId);
+      if (!parent) return res.status(404).json({ success: false, message: "Selected parent manager was not found." });
+    }
+    const created = await config.model.create(data);
+    if (parent) await parent.updateOne({ $addToSet: { [config.parentLinkField]: created._id } });
+    return res.status(201).json({ success: true, message: role + " user created successfully.", user: { id: String(created._id), role, userId, name } });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ success: false, message: "That user ID is already in use." });
+    return res.status(500).json({ success: false, message: "Failed to create user.", error: error.message });
+  }
+};
+
+module.exports = { getHierarchyUsers, updateHierarchyUser, createHierarchyUser };
