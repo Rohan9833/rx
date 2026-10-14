@@ -53,7 +53,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     navigate(`/LiveUser/${adminId}`);
   };
   const gotoUserManagement = () => {
-    navigate(`/UserManagement/${adminId}`);
+    navigate(`/user-management/${adminId}`);
   };
 
   const handleNavigateMatchSummary = () => {
@@ -116,7 +116,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
       setMenuItem(`TeamWise`);
     } else if (pathname === `/Insight/${adminId}`) {
       setMenuItem(`insights`);
-    } else if (pathname === `/UserManagement/${adminId}`) {
+    } else if (pathname === `/user-management/${adminId}`) {
       setMenuItem("userManagement");
     } else {
       setMenuItem("");
