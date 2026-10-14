@@ -121,6 +121,7 @@ const UserManagement = () => {
     setActiveTab("users");
     setSearch("");
     setStatusFilter("All");
+    setRoleFilter(mode === "inactive" ? "All" : "TLM");
     setTablePage(1);
     await loadUsers(mode);
   };
@@ -158,14 +159,14 @@ const UserManagement = () => {
               .includes(query),
         );
 
-      const matchesRole = user.role === roleFilter;
+      const matchesRole = (viewMode === "inactive" && roleFilter === "All") || user.role === roleFilter;
 
       const matchesStatus =
         statusFilter === "All" || user.status === statusFilter;
 
       return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [users, search, roleFilter, statusFilter]);
+  }, [users, search, roleFilter, statusFilter, viewMode]);
 
   const activeCount = users.filter((user) => user.status === "Active").length;
   const tablePageCount = Math.max(1, Math.ceil(filteredUsers.length / TABLE_PAGE_SIZE));
@@ -534,7 +535,10 @@ const UserManagement = () => {
                 )}
               </div>
 
-              <div className="um-role-toggle" role="group" aria-label="Choose one user role">
+              <div className="um-role-toggle" role="group" aria-label="Choose user role">
+                {viewMode === "inactive" && (
+                  <button type="button" className={roleFilter === "All" ? "active" : ""} aria-pressed={roleFilter === "All"} onClick={() => setRoleFilter("All")}>All</button>
+                )}
                 {ROLES.map((role) => (
                   <button type="button" key={role} className={roleFilter === role ? "active" : ""} aria-pressed={roleFilter === role} onClick={() => setRoleFilter(role)}>
                     {ROLE_LABELS[role]}
