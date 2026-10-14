@@ -409,10 +409,10 @@ const UserManagement = () => {
 
   return (
     <>
-      <div className="relative block min-h-screen w-full max-w-full overflow-x-hidden">
+      <div className="relative block min-h-screen w-full max-w-full">
         <Sidebar />
         <div
-          className="relative z-1 min-h-screen w-full min-w-0 max-w-full overflow-x-hidden bg-white sm:ml-[320px] sm:w-[calc(100%-320px)]"
+          className="um-layout-content relative z-1 min-h-screen w-full min-w-0 max-w-full overflow-x-hidden bg-white"
           style={{ borderRadius: "40px" }}
         >
           <div className="h-[100px] mb-[-20px]">
