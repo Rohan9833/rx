@@ -263,23 +263,19 @@ const UserManagement = () => {
     }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
-
-    // Prevent deleting a manager while they still have direct reports.
-    const hasReports = users.some(
-      (user) => String(user.managerId) === String(deleteId),
-    );
-
-    if (hasReports) {
-      window.alert(
-        "This user has direct reports. Reassign those users before deleting this account.",
-      );
+    const user = getUser(deleteId);
+    if (!user) { setDeleteId(null); return; }
+    try {
+      setLoadError("");
+      await axios.patch(`${API_BASE_URL}/hierarchy/users/${user.role}/${user.id}/deactivate`);
+      setUsers((previous) => previous.map((item) => String(item.id) === String(user.id) ? { ...item, status: "Inactive" } : item));
       setDeleteId(null);
-      return;
+      await loadUsers();
+    } catch (error) {
+      setLoadError(error.response?.data?.message || error.message || "Failed to mark user inactive.");
     }
-
-    setDeleteId(null);
   };
 
   const toggleExpanded = (id) => {
@@ -589,8 +585,8 @@ const UserManagement = () => {
                           <button
                             type="button"
                             className="um-icon-btn delete"
-                            title="Delete is not available in this editor"
-                            disabled
+                            title="Mark user inactive"
+                            onClick={() => setDeleteId(user.id)}
                           >
                             <FaTrash />
                           </button>
@@ -839,11 +835,10 @@ const UserManagement = () => {
               <FaTrash />
             </div>
 
-            <h2>Delete User?</h2>
+            <h2>Deactivate User?</h2>
             <p>
-              Are you sure you want to delete{" "}
-              <strong>{getUser(deleteId)?.name}</strong>? This action removes
-              the user from this page.
+              Are you sure you want to mark{" "}
+              <strong>{getUser(deleteId)?.name}</strong> as inactive? The account will be retained in the database.
             </p>
 
             <div className="um-modal-footer">
@@ -860,7 +855,7 @@ const UserManagement = () => {
                 className="um-danger-btn"
                 onClick={confirmDelete}
               >
-                Delete User
+                Confirm Deactivation
               </button>
             </div>
           </div>
