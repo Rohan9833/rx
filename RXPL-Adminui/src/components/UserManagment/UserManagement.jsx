@@ -56,7 +56,9 @@ const UserManagement = () => {
   const [mrPagination, setMrPagination] = useState({ mrPage: 1, mrLimit: 50, totalMRs: 0, totalMRPages: 0, hasMoreMRs: false });
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("All");
+  const [roleFilter, setRoleFilter] = useState("TLM");
+  const [tablePage, setTablePage] = useState(1);
+  const TABLE_PAGE_SIZE = 10;
   const [statusFilter, setStatusFilter] = useState("All");
   const [activeTab, setActiveTab] = useState("users");
   const [modalOpen, setModalOpen] = useState(false);
@@ -127,7 +129,7 @@ const UserManagement = () => {
               .includes(query),
         );
 
-      const matchesRole = roleFilter === "All" || user.role === roleFilter;
+      const matchesRole = user.role === roleFilter;
 
       const matchesStatus =
         statusFilter === "All" || user.status === statusFilter;
@@ -137,6 +139,9 @@ const UserManagement = () => {
   }, [users, search, roleFilter, statusFilter]);
 
   const activeCount = users.filter((user) => user.status === "Active").length;
+  const tablePageCount = Math.max(1, Math.ceil(filteredUsers.length / TABLE_PAGE_SIZE));
+  const paginatedUsers = filteredUsers.slice((tablePage - 1) * TABLE_PAGE_SIZE, tablePage * TABLE_PAGE_SIZE);
+  useEffect(() => { setTablePage(1); }, [roleFilter, search, statusFilter]);
 
   const openAddModal = () => {
     setEditingId(null);
