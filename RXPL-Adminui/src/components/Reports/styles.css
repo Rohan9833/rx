@@ -1,0 +1,3 @@
+.react-tabs__tab--selected {
+    @apply border-b-2 border-blue-950;
+  }

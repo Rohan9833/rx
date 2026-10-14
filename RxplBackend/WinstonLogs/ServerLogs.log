@@ -1,0 +1,104 @@
+10-14-2026 13:02:12 [VERBOSE] 22580 POST /api/admin-login : {"ID":"L11011","PASSWORD":"12345"}
+10-14-2026 13:02:13 [VERBOSE] POST /admin-login - 200  
+10-14-2026 13:02:13 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:02:13 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:02:13 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:02:13 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:02:14 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:02:14 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:02:22 [VERBOSE] 22580 GET /api/getAllNoMatchImages : {}
+10-14-2026 13:02:22 [VERBOSE] GET /getAllNoMatchImages - 404  
+10-14-2026 13:02:26 [VERBOSE] 22580 GET /api/monthly-brand-summary?groupBy=state : {}
+10-14-2026 13:02:26 [VERBOSE] GET /monthly-brand-summary?groupBy=state - 200  
+10-14-2026 13:02:30 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:02:30 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:02:30 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:02:30 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:02:31 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:02:31 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:08:18 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:08:18 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:08:18 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:08:23 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:08:23 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:08:23 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:08:29 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:08:29 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:08:29 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:08:30 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:08:30 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:08:30 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:09:16 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:09:16 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:09:16 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:09:17 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:09:18 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:09:18 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:09:47 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:09:47 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:09:47 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:09:48 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:09:48 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:09:48 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:09:59 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:09:59 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:09:59 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:09:59 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:09:59 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:09:59 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:10:23 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:10:23 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:10:23 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:10:23 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:10:23 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:10:23 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:12:56 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:12:56 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:12:56 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:12:56 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:12:57 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:12:57 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:13:07 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:13:07 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:13:13 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:13:13 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:13:13 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:13:23 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:13:23 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:13:23 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:14:56 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:14:56 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:14:56 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:15:18 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:15:18 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:15:19 [VERBOSE] GET /prescription-stats - 304  
+10-14-2026 13:15:19 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:15:19 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:15:19 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:15:20 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:15:20 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:15:20 [VERBOSE] GET /getMrRank/Linux - 304  
+10-14-2026 13:15:37 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:15:37 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:15:37 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:15:37 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:15:38 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:15:38 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:18:18 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:18:18 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:18:19 [VERBOSE] GET /prescription-stats - 200  
+10-14-2026 13:18:20 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:18:20 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:18:20 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:19:41 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:19:41 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:19:41 [VERBOSE] GET /prescription-stats - 304  
+10-14-2026 13:19:41 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:19:41 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:19:42 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:19:49 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:19:49 [VERBOSE] 22580 GET /api/prescription-stats : {}
+10-14-2026 13:19:49 [VERBOSE] GET /prescription-stats - 304  
+10-14-2026 13:19:50 [VERBOSE] GET /getMrRank/Linux - 200  
+10-14-2026 13:19:50 [VERBOSE] 22580 GET /api/getMrRank/Linux : {}
+10-14-2026 13:19:50 [VERBOSE] GET /getMrRank/Linux - 200  

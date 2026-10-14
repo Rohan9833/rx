@@ -1,0 +1,4 @@
+.react-tabs__tab--selected {
+    /* @apply border-b-2 border-pink-500; */
+    @apply bg-transparent;
+  }
