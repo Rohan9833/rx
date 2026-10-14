@@ -493,6 +493,7 @@ const UserManagement = () => {
                   <option value="All">All Statuses</option>
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
+                  <option value="Not tracked">Not tracked</option>
                 </select>
               </div>
             </div>
