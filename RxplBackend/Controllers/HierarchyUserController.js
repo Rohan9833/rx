@@ -194,6 +194,20 @@ const deactivateHierarchyUser = async (req, res) => {
   }
 };
 
+const activateHierarchyUser = async (req, res) => {
+  try {
+    const role = String(req.params.role || "").toUpperCase();
+    const config = getByRole(role);
+    if (!config) return res.status(400).json({ success: false, message: "Role must be TLM, SLM, FLM, or MR." });
+    if (!isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid user record ID." });
+    const user = await config.model.findByIdAndUpdate(req.params.id, { $set: { isActive: true } }, { new: true, runValidators: true });
+    if (!user) return res.status(404).json({ success: false, message: "User not found." });
+    return res.status(200).json({ success: true, message: role + " user reactivated successfully." });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to reactivate user.", error: error.message });
+  }
+};
+
 const getHierarchyUsers = async (req, res) => {
   const requestId = `hierarchy-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const startedAt = Date.now();
@@ -217,16 +231,18 @@ const getHierarchyUsers = async (req, res) => {
       }
     };
 
+    const inactiveView = String(req.query.status || "active").toLowerCase() === "inactive";
+    const activeQuery = inactiveView ? { isActive: false } : { isActive: { $ne: false } };
     const mrPage = Math.max(1, Number.parseInt(req.query.mrPage, 10) || 1);
     const mrLimit = Math.min(100, Math.max(1, Number.parseInt(req.query.mrLimit, 10) || 50));
     const mrSkip = (mrPage - 1) * mrLimit;
 
     const [tlms, slms, flms, mrs, totalMRs] = await Promise.all([
-      runQuery("TLM", Tlm.find().select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm isActive").lean()),
-      runQuery("SLM", Slm.find().select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm isActive").lean()),
-      runQuery("FLM", Flm.find().select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs isActive").lean()),
-      runQuery("MR", Mr.find().sort({ _id: -1 }).skip(mrSkip).limit(mrLimit).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT isActive status").lean()),
-      runQuery("MR count", Mr.countDocuments()),
+      runQuery("TLM", Tlm.find(activeQuery).select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm isActive").lean()),
+      runQuery("SLM", Slm.find(activeQuery).select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm isActive").lean()),
+      runQuery("FLM", Flm.find(activeQuery).select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs isActive").lean()),
+      runQuery("MR", Mr.find(activeQuery).sort({ _id: -1 }).skip(mrSkip).limit(mrLimit).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT isActive status").lean()),
+      runQuery("MR count", Mr.countDocuments(activeQuery)),
     ]);
 
     console.log(`[Hierarchy API][${requestId}] All queries completed; building hierarchy response`);
@@ -267,7 +283,7 @@ const getHierarchyUsers = async (req, res) => {
         managerId: parent ? parent.id : null,
         managerRole: parent ? parent.role : null,
         managerName: parent ? parent.name : "",
-        status: doc.status || (doc.isActive === true ? "Active" : doc.isActive === false ? "Inactive" : "Not tracked"),
+        status: doc.isActive === false ? "Inactive" : "Active",
       };
     });
 
@@ -301,4 +317,4 @@ const getHierarchyUsers = async (req, res) => {
   }
 };
 
-module.exports = { getHierarchyUsers, updateHierarchyUser, createHierarchyUser, deactivateHierarchyUser };
+module.exports = { getHierarchyUsers, updateHierarchyUser, createHierarchyUser, deactivateHierarchyUser, activateHierarchyUser };
