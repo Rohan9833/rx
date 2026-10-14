@@ -14,6 +14,9 @@ import {
   FaUserShield,
 } from "react-icons/fa";
 import "./UserManagement.css";
+import Sidebar from "../Sidebar/Sidebar";
+import Header from "../Header/Header";
+import BackGroundImg from "../../assets/bg.png";
 
 const INITIAL_USERS = [
   {
@@ -104,6 +107,7 @@ const getAllowedManagerRoles = (role) => {
 };
 
 const UserManagement = () => {
+  const pageName = "User Management";
   const [users, setUsers] = useState(INITIAL_USERS);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
@@ -404,7 +408,25 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="user-management-page">
+    <>
+      <div className="grid grid-cols-2 absolute min-h-screen w-full">
+        <Sidebar />
+        <div
+          className="sm:w-[calc(100vw-250px)] w-full z-1 bg-white absolute sm:left-[250px] left-0 min-h-screen"
+          style={{ borderRadius: "40px" }}
+        >
+          <div className="h-[100px] mb-[-20px]">
+            <Header pageName={pageName} />
+          </div>
+          <div
+            style={{
+              backgroundImage: `url(${BackGroundImg})`,
+              backgroundBlendMode: "overlay",
+            }}
+            className="border-pink-500 border-2 bg-cover bg-no-repeat mx-auto max-w-screen relative"
+          >
+            <div className="rounded-2xl shadow-md min-h-[calc(100vh-100px)]">
+              <div className="user-management-page">
       <div className="um-page-header">
         <div>
           <div className="um-breadcrumb">Administration / Users</div>
@@ -886,7 +908,12 @@ const UserManagement = () => {
           </div>
         </div>
       )}
-    </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
