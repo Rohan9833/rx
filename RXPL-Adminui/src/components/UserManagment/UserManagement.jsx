@@ -708,7 +708,7 @@ const UserManagement = () => {
           }}
         >
           <div
-            className="um-modal"
+            className="um-modal um-account-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="um-modal-title"
