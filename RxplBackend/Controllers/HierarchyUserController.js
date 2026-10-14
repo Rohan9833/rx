@@ -180,6 +180,20 @@ const createHierarchyUser = async (req, res) => {
   }
 };
 
+const deactivateHierarchyUser = async (req, res) => {
+  try {
+    const role = String(req.params.role || "").toUpperCase();
+    const config = getByRole(role);
+    if (!config) return res.status(400).json({ success: false, message: "Role must be TLM, SLM, FLM, or MR." });
+    if (!isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid user record ID." });
+    const user = await config.model.findByIdAndUpdate(req.params.id, { $set: { isActive: false } }, { new: true, runValidators: true });
+    if (!user) return res.status(404).json({ success: false, message: "User not found." });
+    return res.status(200).json({ success: true, message: role + " user marked inactive." });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to mark user inactive.", error: error.message });
+  }
+};
+
 const getHierarchyUsers = async (req, res) => {
   const requestId = `hierarchy-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const startedAt = Date.now();
@@ -287,4 +301,4 @@ const getHierarchyUsers = async (req, res) => {
   }
 };
 
-module.exports = { getHierarchyUsers, updateHierarchyUser, createHierarchyUser };
+module.exports = { getHierarchyUsers, updateHierarchyUser, createHierarchyUser, deactivateHierarchyUser };
