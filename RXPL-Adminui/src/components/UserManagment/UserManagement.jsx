@@ -67,6 +67,8 @@ const UserManagement = () => {
   const [formError, setFormError] = useState("");
   const [parentSearch, setParentSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
+  const [deactivationError, setDeactivationError] = useState("");
   const [expandedIds, setExpandedIds] = useState([]);
 
   const loadUsers = async () => {
@@ -264,17 +266,22 @@ const UserManagement = () => {
   };
 
   const confirmDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteId || deactivating) return;
     const user = getUser(deleteId);
     if (!user) { setDeleteId(null); return; }
     try {
+      setDeactivating(true);
+      setDeactivationError("");
       setLoadError("");
-      await axios.patch(`${API_BASE_URL}/hierarchy/users/${user.role}/${user.id}/deactivate`);
+      const response = await axios.patch(`${API_BASE_URL}/hierarchy/users/${user.role}/${user.id}/deactivate`);
+      if (!response.data?.success) throw new Error(response.data?.message || "The server did not deactivate this user.");
       setUsers((previous) => previous.map((item) => String(item.id) === String(user.id) ? { ...item, status: "Inactive" } : item));
       setDeleteId(null);
       await loadUsers();
     } catch (error) {
-      setLoadError(error.response?.data?.message || error.message || "Failed to mark user inactive.");
+      setDeactivationError(error.response?.data?.message || error.message || "Failed to mark user inactive.");
+    } finally {
+      setDeactivating(false);
     }
   };
 
@@ -586,7 +593,7 @@ const UserManagement = () => {
                             type="button"
                             className="um-icon-btn delete"
                             title="Mark user inactive"
-                            onClick={() => setDeleteId(user.id)}
+                            onClick={() => { setDeactivationError(""); setDeleteId(user.id); }}
                           >
                             <FaTrash />
                           </button>
@@ -841,10 +848,13 @@ const UserManagement = () => {
               <strong>{getUser(deleteId)?.name}</strong> as inactive? The account will be retained in the database.
             </p>
 
+            {deactivationError && <div className="um-form-error" role="alert">{deactivationError}</div>}
+
             <div className="um-modal-footer">
               <button
                 type="button"
                 className="um-secondary-btn"
+                disabled={deactivating}
                 onClick={() => setDeleteId(null)}
               >
                 Cancel
@@ -854,8 +864,9 @@ const UserManagement = () => {
                 type="button"
                 className="um-danger-btn"
                 onClick={confirmDelete}
+                disabled={deactivating}
               >
-                Confirm Deactivation
+                {deactivating ? "Deactivating..." : "Confirm Deactivation"}
               </button>
             </div>
           </div>
