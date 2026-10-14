@@ -119,6 +119,7 @@ const UserManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState("");
+  const [parentSearch, setParentSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const [expandedIds, setExpandedIds] = useState([1, 2, 3, 4]);
 
@@ -156,6 +157,7 @@ const UserManagement = () => {
   const openAddModal = () => {
     setEditingId(null);
     setForm({ ...EMPTY_FORM });
+    setParentSearch("");
     setFormError("");
     setModalOpen(true);
   };
@@ -173,6 +175,7 @@ const UserManagement = () => {
       managerId: user.managerId ? String(user.managerId) : "",
       status: user.status,
     });
+    setParentSearch("");
     setFormError("");
     setModalOpen(true);
   };
@@ -180,6 +183,7 @@ const UserManagement = () => {
   const closeModal = () => {
     setModalOpen(false);
     setEditingId(null);
+    setParentSearch("");
     setFormError("");
   };
 
@@ -812,8 +816,16 @@ const UserManagement = () => {
                   />
                 </label>
 
-                <label>
+                <label className="um-parent-field">
                   {form.role === "HO" ? "Parent ID" : `Parent ${ROLES[ROLES.indexOf(form.role) - 1]} ID`}
+                  <input
+                    type="search"
+                    className="um-parent-search"
+                    value={parentSearch}
+                    onChange={(event) => setParentSearch(event.target.value)}
+                    placeholder="Search parent by ID or name"
+                    disabled={form.role === "HO"}
+                  />
                   <select
                     value={form.managerId}
                     onChange={(event) => updateForm("managerId", event.target.value)}
@@ -823,7 +835,7 @@ const UserManagement = () => {
                     <option value="">
                       {form.role === "HO" ? "Not applicable" : "Select parent"}
                     </option>
-                    {getEligibleManagers().map((manager) => (
+                    {getEligibleManagers().filter((manager) => `${manager.username || ""} ${manager.name} ${manager.role}`.toLowerCase().includes(parentSearch.trim().toLowerCase())).map((manager) => (
                       <option key={manager.id} value={manager.id}>
                         {manager.username || manager.name} — {manager.name}
                       </option>
