@@ -240,7 +240,7 @@ const UserManagement = () => {
     if (form.role !== "TLM") {
       const manager = getUser(managerId);
       if (!manager || !allowedRoles.includes(manager.role) || String(manager.id) === String(editingId)
-        || isDescendant(managerId, editingId)) {
+        || (editingId && isDescendant(managerId, editingId))) {
         setFormError("Please select a valid reporting manager.");
         return;
       }
