@@ -541,18 +541,18 @@ const UserManagement = () => {
                   </button>
                 ))}
               </div>
-              <div className="um-filters">
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value)}
-                  aria-label="Filter by status"
-                >
-                  <option value="All">All Statuses</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Not tracked">Not tracked</option>
-                </select>
-              </div>
+              {viewMode === "active" && (
+                <div className="um-filters">
+                  <select
+                    value={statusFilter}
+                    onChange={(event) => setStatusFilter(event.target.value)}
+                    aria-label="Filter by status"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Active">Active</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="um-table-info">
@@ -617,23 +617,16 @@ const UserManagement = () => {
 
                       <td>
                         <div className="um-actions">
-                          <button
-                            type="button"
-                            className="um-icon-btn edit"
-                            title="Edit user"
-                            onClick={() => openEditModal(user)}
-                          >
-                            <FaEdit />
-                          </button>
-
-                          <button
-                            type="button"
-                            className="um-icon-btn delete"
-                            title="Mark user inactive"
-                            onClick={() => { setDeactivationError(""); setDeleteId(user.id); }}
-                          >
-                            <FaTrash />
-                          </button>
+                          {viewMode === "inactive" ? (
+                            <button type="button" className="um-icon-btn edit" title="Reactivate user" onClick={() => reactivateUser(user)} disabled={reactivatingId === user.id}>
+                              <FaUserCheck />
+                            </button>
+                          ) : (
+                            <>
+                              <button type="button" className="um-icon-btn edit" title="Edit user" onClick={() => openEditModal(user)}><FaEdit /></button>
+                              <button type="button" className="um-icon-btn delete" title="Mark user inactive" onClick={() => { setDeactivationError(""); setDeleteId(user.id); }}><FaTrash /></button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
