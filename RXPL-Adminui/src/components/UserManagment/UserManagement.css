@@ -805,18 +805,27 @@
 }
 
 
-/* Keep this page's content inside the available viewport without clipping the shared fixed sidebar. */
+/* This page alone accounts for the fixed sidebar; avoid adding its width to the viewport. */
 .um-layout-content {
+  position: relative;
+  left: 0;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  overflow-x: clip;
+  margin-left: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
   .um-layout-content {
-    margin-left: 320px;
-    width: calc(100% - 320px);
+    position: absolute;
+    top: 0;
+    left: 320px;
+    right: 0;
+    width: auto;
+    max-width: calc(100% - 320px);
+    margin-left: 0;
   }
 }
 
