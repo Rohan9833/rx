@@ -409,10 +409,10 @@ const UserManagement = () => {
 
   return (
     <>
-      <div className="relative grid grid-cols-1 sm:grid-cols-[250px_minmax(0,1fr)] min-h-screen w-full max-w-full overflow-x-clip">
+      <div className="relative grid grid-cols-1 sm:grid-cols-[320px_minmax(0,1fr)] min-h-screen w-full max-w-full overflow-x-hidden">
         <Sidebar />
         <div
-          className="w-full min-w-0 max-w-full z-1 bg-white relative sm:col-start-2 sm:col-end-3 sm:row-start-1 min-h-screen overflow-x-clip"
+          className="w-full min-w-0 max-w-full z-1 bg-white relative sm:col-start-2 sm:col-end-3 sm:row-start-1 min-h-screen overflow-x-hidden"
           style={{ borderRadius: "40px" }}
         >
           <div className="h-[100px] mb-[-20px]">
