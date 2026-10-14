@@ -59,7 +59,7 @@ const UserManagement = () => {
   const [mrPagination, setMrPagination] = useState({ mrPage: 1, mrLimit: 50, totalMRs: 0, totalMRPages: 0, hasMoreMRs: false });
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("TLM");
+  const [roleFilter, setRoleFilter] = useState("MR");
   const [tablePage, setTablePage] = useState(1);
   const TABLE_PAGE_SIZE = 10;
   const [statusFilter, setStatusFilter] = useState("All");
@@ -121,7 +121,7 @@ const UserManagement = () => {
     setActiveTab("users");
     setSearch("");
     setStatusFilter("All");
-    setRoleFilter(mode === "inactive" ? "All" : "TLM");
+    setRoleFilter(mode === "inactive" ? "All" : "MR");
     setTablePage(1);
     await loadUsers(mode);
   };
@@ -636,17 +636,28 @@ const UserManagement = () => {
                     </tr>
                   ))}
 
-                  {paginatedUsers.length === 0 && (
+                  {!loadingUsers && !loadingMoreMrs && paginatedUsers.length === 0 && (
                     <tr>
                       <td colSpan="7">
                         <div className="um-empty-state">
-                          <FaUsers />
+                          <FaSearch />
                           <strong>No users found</strong>
                           <span>Try changing your search or filters.</span>
                         </div>
                       </td>
                     </tr>
                   )}
+                  {(loadingUsers || loadingMoreMrs) && paginatedUsers.length === 0 && (
+                    <tr>
+                      <td colSpan="7">
+                        <div className="um-table-loading" role="status" aria-live="polite">
+                          <span className="um-loading-spinner" />
+                          <strong>Loading users…</strong>
+                          <span>Fetching the latest user records.</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}}
                 </tbody>
               </table>
             </div>
