@@ -217,11 +217,6 @@ const UserManagement = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!editingId) {
-      setFormError("Creating new accounts is not connected in this hierarchy editor yet. Select an existing TLM, SLM, FLM, or MR to edit.");
-      return;
-    }
-
     const name = form.name.trim();
     const userId = form.userId.trim();
     if (!name || !userId || !form.hq.trim() || !form.zone.trim() || (form.role !== "TLM" && !form.region.trim())) {
@@ -251,16 +246,16 @@ const UserManagement = () => {
 
     try {
       setFormError("");
-      await axios.put(`${API_BASE_URL}/hierarchy/users/${form.role}/${editingId}`, {
-        userId,
-        name,
-        password: form.password,
-        hq: form.hq.trim(),
-        region: form.region.trim(),
-        zone: form.zone.trim(),
-        businessUnit: form.businessUnit || "",
-        parentId: managerId,
-      });
+      const payload = {
+        role: form.role, userId, name, password: form.password,
+        hq: form.hq.trim(), region: form.region.trim(), zone: form.zone.trim(),
+        businessUnit: form.businessUnit || "", parentId: managerId, status: form.status,
+      };
+      if (editingId) {
+        await axios.put(`${API_BASE_URL}/hierarchy/users/${form.role}/${editingId}`, payload);
+      } else {
+        await axios.post(`${API_BASE_URL}/hierarchy/users`, payload);
+      }
       await loadUsers();
       closeModal();
     } catch (error) {
