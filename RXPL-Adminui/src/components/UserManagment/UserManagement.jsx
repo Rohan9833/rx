@@ -92,11 +92,13 @@ const ROLE_LABELS = {
 };
 
 const EMPTY_FORM = {
-  name: "",
-  username: "",
-  email: "",
-  phone: "",
   role: "MR",
+  userId: "",
+  name: "",
+  password: "",
+  hq: "",
+  region: "",
+  zone: "",
   managerId: "",
   status: "Active",
 };
@@ -161,11 +163,13 @@ const UserManagement = () => {
   const openEditModal = (user) => {
     setEditingId(user.id);
     setForm({
-      name: user.name,
-      username: user.username,
-      email: user.email,
-      phone: user.phone || "",
       role: user.role,
+      userId: user.username || "",
+      name: user.name,
+      password: user.password || "",
+      hq: user.hq || "",
+      region: user.region || "",
+      zone: user.zone || "",
       managerId: user.managerId ? String(user.managerId) : "",
       status: user.status,
     });
@@ -221,33 +225,22 @@ const UserManagement = () => {
     event.preventDefault();
 
     const name = form.name.trim();
-    const username = form.username.trim();
-    const email = form.email.trim();
+    const userId = form.userId.trim();
+    const password = form.password.trim();
 
-    if (!name || !username || !email) {
-      setFormError("Name, username, and email are required.");
+    if (!name || !userId || !password || !form.hq.trim() || !form.region.trim() || !form.zone.trim()) {
+      setFormError("Please complete all required account and location details.");
       return;
     }
 
-    const duplicateUsername = users.some(
+    const duplicateUserId = users.some(
       (user) =>
-        user.username.toLowerCase() === username.toLowerCase() &&
+        String(user.username || "").toLowerCase() === userId.toLowerCase() &&
         user.id !== editingId,
     );
 
-    if (duplicateUsername) {
-      setFormError("This username is already in use.");
-      return;
-    }
-
-    const duplicateEmail = users.some(
-      (user) =>
-        user.email.toLowerCase() === email.toLowerCase() &&
-        user.id !== editingId,
-    );
-
-    if (duplicateEmail) {
-      setFormError("This email address is already in use.");
+    if (duplicateUserId) {
+      setFormError("This ID is already in use.");
       return;
     }
 
@@ -275,9 +268,11 @@ const UserManagement = () => {
 
     const userData = {
       name,
-      username,
-      email,
-      phone: form.phone.trim(),
+      username: userId,
+      password,
+      hq: form.hq.trim(),
+      region: form.region.trim(),
+      zone: form.zone.trim(),
       role: form.role,
       managerId,
       status: form.status,
@@ -741,54 +736,7 @@ const UserManagement = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="um-form-grid">
-                <label>
-                  Full Name <span>*</span>
-                  <input
-                    value={form.name}
-                    onChange={(event) => updateForm("name", event.target.value)}
-                    placeholder="Enter full name"
-                    required
-                  />
-                </label>
-
-                <label>
-                  Username <span>*</span>
-                  <input
-                    value={form.username}
-                    onChange={(event) =>
-                      updateForm("username", event.target.value)
-                    }
-                    placeholder="Enter username"
-                    required
-                  />
-                </label>
-
-                <label>
-                  Email Address <span>*</span>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(event) =>
-                      updateForm("email", event.target.value)
-                    }
-                    placeholder="name@company.com"
-                    required
-                  />
-                </label>
-
-                <label>
-                  Phone Number
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(event) =>
-                      updateForm("phone", event.target.value)
-                    }
-                    placeholder="Enter phone number"
-                  />
-                </label>
-
+              <div className="um-form-grid um-account-form-grid">
                 <label>
                   User Role <span>*</span>
                   <select
@@ -797,51 +745,97 @@ const UserManagement = () => {
                   >
                     {ROLES.map((role) => (
                       <option value={role} key={role}>
-                        {ROLE_LABELS[role]}
-                        {role !== "HO" ? ` (${role})` : ""}
+                        {ROLE_LABELS[role]}{role !== "HO" ? ` (${role})` : ""}
                       </option>
                     ))}
                   </select>
                 </label>
 
                 <label>
-                  Reporting Manager
+                  ID <span>*</span>
+                  <input
+                    value={form.userId}
+                    onChange={(event) => updateForm("userId", event.target.value)}
+                    placeholder="Enter user ID"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Full Name <span>*</span>
+                  <input
+                    value={form.name}
+                    onChange={(event) => updateForm("name", event.target.value)}
+                    placeholder="Full name"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Password <span>*</span>
+                  <input
+                    type="password"
+                    value={form.password}
+                    onChange={(event) => updateForm("password", event.target.value)}
+                    placeholder="Enter password"
+                    required={!editingId}
+                  />
+                </label>
+
+                <label>
+                  HQ <span>*</span>
+                  <input
+                    value={form.hq}
+                    onChange={(event) => updateForm("hq", event.target.value)}
+                    placeholder="HQ"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Region <span>*</span>
+                  <input
+                    value={form.region}
+                    onChange={(event) => updateForm("region", event.target.value)}
+                    placeholder="Region"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Zone <span>*</span>
+                  <input
+                    value={form.zone}
+                    onChange={(event) => updateForm("zone", event.target.value)}
+                    placeholder="Zone"
+                    required
+                  />
+                </label>
+
+                <label>
+                  {form.role === "HO" ? "Parent ID" : `Parent ${ROLES[ROLES.indexOf(form.role) - 1]} ID`}
                   <select
                     value={form.managerId}
-                    onChange={(event) =>
-                      updateForm("managerId", event.target.value)
-                    }
+                    onChange={(event) => updateForm("managerId", event.target.value)}
                     disabled={form.role === "HO"}
                     required={form.role !== "HO"}
                   >
                     <option value="">
-                      {form.role === "HO"
-                        ? "Not applicable"
-                        : "Select reporting manager"}
+                      {form.role === "HO" ? "Not applicable" : "Select parent"}
                     </option>
-
                     {getEligibleManagers().map((manager) => (
                       <option key={manager.id} value={manager.id}>
-                        {manager.name} ({manager.role})
+                        {manager.username || manager.name} — {manager.name}
                       </option>
                     ))}
                   </select>
-                  <small>
-                    {form.role === "HO"
-                      ? "Head Office is the top-level role."
-                      : `Select a manager with role: ${getAllowedManagerRoles(
-                          form.role,
-                        ).join(", ")}.`}
-                  </small>
                 </label>
 
                 <label>
                   Account Status
                   <select
                     value={form.status}
-                    onChange={(event) =>
-                      updateForm("status", event.target.value)
-                    }
+                    onChange={(event) => updateForm("status", event.target.value)}
                   >
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
@@ -852,14 +846,9 @@ const UserManagement = () => {
               {formError && <div className="um-form-error">{formError}</div>}
 
               <div className="um-modal-footer">
-                <button
-                  type="button"
-                  className="um-secondary-btn"
-                  onClick={closeModal}
-                >
+                <button type="button" className="um-secondary-btn" onClick={closeModal}>
                   Cancel
                 </button>
-
                 <button type="submit" className="um-primary-btn">
                   {editingId ? "Save Changes" : "Create User"}
                 </button>
