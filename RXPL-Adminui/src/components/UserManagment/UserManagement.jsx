@@ -13,6 +13,7 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaUserShield,
+  FaUserCheck,
 } from "react-icons/fa";
 import "./UserManagement.css";
 import Sidebar from "../Sidebar/Sidebar";
@@ -51,6 +52,8 @@ const getAllowedManagerRoles = (role) => {
 const UserManagement = () => {
   const pageName = "User Management";
   const [users, setUsers] = useState([]);
+  const [viewMode, setViewMode] = useState("active");
+  const [reactivatingId, setReactivatingId] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingMoreMrs, setLoadingMoreMrs] = useState(false);
   const [mrPagination, setMrPagination] = useState({ mrPage: 1, mrLimit: 50, totalMRs: 0, totalMRPages: 0, hasMoreMRs: false });
@@ -71,11 +74,11 @@ const UserManagement = () => {
   const [deactivationError, setDeactivationError] = useState("");
   const [expandedIds, setExpandedIds] = useState([]);
 
-  const loadUsers = async () => {
+  const loadUsers = async (mode = viewMode) => {
     setLoadingUsers(true);
     setLoadError("");
     try {
-      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: 1, mrLimit: 50 } });
+      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: 1, mrLimit: 50, status: mode } });
       if (!response.data?.success || !Array.isArray(response.data.users)) {
         throw new Error(response.data?.message || "The server returned an invalid users response.");
       }
@@ -97,7 +100,7 @@ const UserManagement = () => {
     setLoadError("");
     try {
       const nextPage = mrPagination.mrPage + 1;
-      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: nextPage, mrLimit: mrPagination.mrLimit || 50 } });
+      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: nextPage, mrLimit: mrPagination.mrLimit || 50, status: viewMode } });
       if (!response.data?.success || !Array.isArray(response.data.users)) {
         throw new Error(response.data?.message || "The server returned an invalid users response.");
       }
