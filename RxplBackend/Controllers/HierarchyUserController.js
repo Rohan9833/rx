@@ -135,11 +135,16 @@ const getHierarchyUsers = async (req, res) => {
       }
     };
 
-    const [tlms, slms, flms, mrs] = await Promise.all([
+    const mrPage = Math.max(1, Number.parseInt(req.query.mrPage, 10) || 1);
+    const mrLimit = Math.min(100, Math.max(1, Number.parseInt(req.query.mrLimit, 10) || 50));
+    const mrSkip = (mrPage - 1) * mrLimit;
+
+    const [tlms, slms, flms, mrs, totalMRs] = await Promise.all([
       runQuery("TLM", Tlm.find().select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm").lean()),
       runQuery("SLM", Slm.find().select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm").lean()),
       runQuery("FLM", Flm.find().select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs").lean()),
-      runQuery("MR", Mr.find().select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT isActive status").lean()),
+      runQuery("MR", Mr.find().sort({ _id: 1 }).skip(mrSkip).limit(mrLimit).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT isActive status").lean()),
+      runQuery("MR count", Mr.countDocuments()),
     ]);
 
     console.log(`[Hierarchy API][${requestId}] All queries completed; building hierarchy response`);
@@ -192,7 +197,17 @@ const getHierarchyUsers = async (req, res) => {
     ];
 
     console.log(`[Hierarchy API][${requestId}] Responding with ${users.length} users in ${Date.now() - startedAt}ms`);
-    return res.status(200).json({ success: true, users });
+    return res.status(200).json({
+      success: true,
+      users,
+      pagination: {
+        mrPage,
+        mrLimit,
+        totalMRs,
+        totalMRPages: Math.ceil(totalMRs / mrLimit),
+        hasMoreMRs: mrSkip + mrs.length < totalMRs,
+      },
+    });
   } catch (error) {
     console.error(`[Hierarchy API][${requestId}] Request FAILED after ${Date.now() - startedAt}ms:`, error);
     return res.status(500).json({
