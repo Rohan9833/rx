@@ -804,6 +804,22 @@
   border-top: 0;
 }
 
+
+/* Keep this page's content inside the available viewport without clipping the shared fixed sidebar. */
+.um-layout-content {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@media (min-width: 640px) {
+  .um-layout-content {
+    margin-left: 320px;
+    width: calc(100% - 320px);
+  }
+}
+
 /* Responsive */
 
 @media (max-width: 1100px) {
