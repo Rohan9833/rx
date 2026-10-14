@@ -116,6 +116,30 @@ const UserManagement = () => {
 
   const getUser = (id) => users.find((user) => String(user.id) === String(id));
 
+  const switchView = async (mode) => {
+    setViewMode(mode);
+    setActiveTab("users");
+    setSearch("");
+    setStatusFilter("All");
+    setTablePage(1);
+    await loadUsers(mode);
+  };
+
+  const reactivateUser = async (user) => {
+    if (!user || reactivatingId) return;
+    try {
+      setReactivatingId(user.id);
+      setLoadError("");
+      const response = await axios.patch(API_BASE_URL + "/hierarchy/users/" + user.role + "/" + user.id + "/activate");
+      if (!response.data?.success) throw new Error(response.data?.message || "The server did not reactivate this user.");
+      await loadUsers("inactive");
+    } catch (error) {
+      setLoadError(error.response?.data?.message || error.message || "Failed to reactivate user.");
+    } finally {
+      setReactivatingId(null);
+    }
+  };
+
   const getManagerName = (managerId) => {
     if (!managerId) return "—";
     return getUser(managerId)?.name || "Unassigned";
