@@ -111,4 +111,71 @@ const updateHierarchyUser = async (req, res) => {
   }
 };
 
-module.exports = { updateHierarchyUser };
+
+const getHierarchyUsers = async (req, res) => {
+  try {
+    const [tlms, slms, flms, mrs] = await Promise.all([
+      Tlm.find().lean(),
+      Slm.find().lean(),
+      Flm.find().lean(),
+      Mr.find().lean(),
+    ]);
+
+    const parentByChild = new Map();
+    const linkChildren = (parents, field, role) => {
+      parents.forEach((parent) => {
+        (parent[field] || []).forEach((childId) => {
+          parentByChild.set(String(childId), {
+            id: String(parent._id),
+            role,
+            name: parent[ROLE_CONFIG[role].nameField] || parent[ROLE_CONFIG[role].idField] || role,
+          });
+        });
+      });
+    };
+
+    linkChildren(tlms, "Slm", "TLM");
+    linkChildren(slms, "Flm", "SLM");
+    linkChildren(flms, "Mrs", "FLM");
+
+    const normalize = (documents, role) => documents.map((doc) => {
+      const config = getByRole(role);
+      const parent = parentByChild.get(String(doc._id)) || null;
+      const name = doc[config.nameField] || doc[config.idField] || role;
+      const userId = doc[config.idField] || "";
+      return {
+        id: String(doc._id),
+        userId: String(userId),
+        username: String(userId),
+        name: String(name),
+        email: role === "MR" ? String(doc.EMAIL || "") : "",
+        role,
+        hq: String(doc.HQ || ""),
+        region: String(doc.REGION || ""),
+        zone: String(doc.ZONE || ""),
+        businessUnit: String(doc.BUSINESSUNIT || ""),
+        managerId: parent ? parent.id : null,
+        managerRole: parent ? parent.role : null,
+        managerName: parent ? parent.name : "",
+        status: doc.Status || doc.status || (doc.isActive === false ? "Inactive" : "Active"),
+      };
+    });
+
+    const users = [
+      ...normalize(tlms, "TLM"),
+      ...normalize(slms, "SLM"),
+      ...normalize(flms, "FLM"),
+      ...normalize(mrs, "MR"),
+    ];
+
+    return res.status(200).json({ success: true, users });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load hierarchy users.",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { getHierarchyUsers, updateHierarchyUser };
