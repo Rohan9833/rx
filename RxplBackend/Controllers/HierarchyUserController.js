@@ -127,7 +127,7 @@ const createHierarchyUser = async (req, res) => {
     const hq = String(body.hq || "").trim();
     const region = String(body.region || "").trim();
     const zone = String(body.zone || "").trim();
-    const businessUnit = String(body.businessUnit || "").trim();
+    let businessUnit = String(body.businessUnit || "").trim();
 
     if (!userId || !name || !password || !hq || !zone || (role !== "TLM" && !region)) {
       return res.status(400).json({ success: false, message: "Please provide ID, name, password, HQ, zone, and region where required." });
@@ -147,49 +147,6 @@ const createHierarchyUser = async (req, res) => {
       BUSINESSUNIT: businessUnit,
     };
     if (role !== "TLM") data.REGION = region;
-    if (role === "MR") {
-      data.isActive = body.status !== "Inactive";
-      data.matchSchedules = [];
-
-      // Match schedules are stored on each MR. Seed a new MR with the
-      // unique schedules already used by MRs in the same BUSINESSUNIT.
-      if (businessUnit) {
-        const existingMrs = await Mr.find({
-          BUSINESSUNIT: businessUnit,
-          "matchSchedules.0": { $exists: true },
-        })
-          .select("matchSchedules")
-          .lean();
-
-        const schedulesByKey = new Map();
-        for (const existingMr of existingMrs) {
-          for (const schedule of existingMr.matchSchedules || []) {
-            const key = [
-              schedule.startDate ? new Date(schedule.startDate).toISOString() : "",
-              schedule.endDate ? new Date(schedule.endDate).toISOString() : "",
-              schedule.createdAt ? new Date(schedule.createdAt).toISOString() : "",
-              String(schedule.createdBy || ""),
-            ].join("|");
-
-            if (!schedulesByKey.has(key)) {
-              schedulesByKey.set(key, {
-                startDate: schedule.startDate,
-                endDate: schedule.endDate,
-                isMatchOn: Boolean(schedule.isMatchOn),
-                createdAt: schedule.createdAt,
-                createdBy: schedule.createdBy,
-              });
-            }
-          }
-        }
-
-        data.matchSchedules = Array.from(schedulesByKey.values()).sort((a, b) => {
-          const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
-          const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
-          return dateA - dateB;
-        });
-      }
-    }
 
     let parent = null;
     if (config.parentRole) {
@@ -202,6 +159,77 @@ const createHierarchyUser = async (req, res) => {
       if (!parent) {
         return res.status(404).json({ success: false, message: "Selected parent manager was not found." });
       }
+    }
+
+    if (role === "MR") {
+      data.isActive = body.status !== "Inactive";
+      data.matchSchedules = [];
+
+      // Prefer the selected parent manager's business unit when the form
+      // does not send one. Avoid creating an MR detached from its business unit.
+      if (!businessUnit && parent?.BUSINESSUNIT) {
+        businessUnit = String(parent.BUSINESSUNIT).trim();
+        data.BUSINESSUNIT = businessUnit;
+      }
+
+      if (!businessUnit) {
+        return res.status(400).json({
+          success: false,
+          message: "Business unit is required for an MR. Select a parent with a business unit or provide one.",
+        });
+      }
+
+      const existingMrs = await Mr.find({ BUSINESSUNIT: businessUnit })
+        .select("State TEAMNAME isMatchOn MatchId lastMatchRecord matchSchedules")
+        .lean();
+
+      // Reuse shared configuration from this business unit, prioritizing
+      // an MR that is currently in an active match.
+      const activeMr = existingMrs.find((mr) => mr.isMatchOn === true);
+      const configuredMr = activeMr || existingMrs.find((mr) =>
+        mr.State || mr.TEAMNAME || (mr.matchSchedules || []).length
+      );
+
+      if (configuredMr?.State) data.State = configuredMr.State;
+      if (configuredMr?.TEAMNAME) data.TEAMNAME = configuredMr.TEAMNAME;
+
+      // Match participation metadata is shared only when a same-business-unit
+      // MR is actively in a match. Never copy that MR's scores or prescriptions.
+      if (activeMr) {
+        data.isMatchOn = true;
+        if (activeMr.MatchId) data.MatchId = activeMr.MatchId;
+        if (Array.isArray(activeMr.lastMatchRecord)) {
+          data.lastMatchRecord = [...activeMr.lastMatchRecord];
+        }
+      }
+
+      const schedulesByKey = new Map();
+      for (const existingMr of existingMrs) {
+        for (const schedule of existingMr.matchSchedules || []) {
+          const key = [
+            schedule.startDate ? new Date(schedule.startDate).toISOString() : "",
+            schedule.endDate ? new Date(schedule.endDate).toISOString() : "",
+            schedule.createdAt ? new Date(schedule.createdAt).toISOString() : "",
+            String(schedule.createdBy || ""),
+          ].join("|");
+
+          if (!schedulesByKey.has(key)) {
+            schedulesByKey.set(key, {
+              startDate: schedule.startDate,
+              endDate: schedule.endDate,
+              isMatchOn: Boolean(schedule.isMatchOn),
+              createdAt: schedule.createdAt,
+              createdBy: schedule.createdBy,
+            });
+          }
+        }
+      }
+
+      data.matchSchedules = Array.from(schedulesByKey.values()).sort((a, b) => {
+        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+        return dateA - dateB;
+      });
     }
 
     const created = await config.model.create(data);
