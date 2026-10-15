@@ -70,6 +70,7 @@ const UserManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState("");
+  const [savingUser, setSavingUser] = useState(false);
   const [parentSearch, setParentSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const [deactivating, setDeactivating] = useState(false);
@@ -250,6 +251,7 @@ const UserManagement = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (savingUser) return;
 
     const name = form.name.trim();
     const userId = form.userId.trim();
@@ -279,6 +281,7 @@ const UserManagement = () => {
     }
 
     try {
+      setSavingUser(true);
       setFormError("");
       const payload = {
         role: form.role, userId, name, password: form.password,
@@ -294,6 +297,8 @@ const UserManagement = () => {
       closeModal();
     } catch (error) {
       setFormError(error.response?.data?.message || error.message || "Failed to save user changes.");
+    } finally {
+      setSavingUser(false);
     }
   };
 
@@ -879,11 +884,11 @@ const UserManagement = () => {
               {formError && <div className="um-form-error">{formError}</div>}
 
               <div className="um-modal-footer">
-                <button type="button" className="um-secondary-btn" onClick={closeModal}>
+                <button type="button" className="um-secondary-btn" onClick={closeModal} disabled={savingUser}>
                   Cancel
                 </button>
-                <button type="submit" className="um-primary-btn">
-                  {editingId ? "Save Changes" : "Create User"}
+                <button type="submit" className="um-primary-btn" disabled={savingUser} aria-busy={savingUser}>
+                  {savingUser ? <><span className="um-loading-spinner" aria-hidden="true" /> {editingId ? "Saving..." : "Creating..."}</> : (editingId ? "Save Changes" : "Create User")}
                 </button>
               </div>
             </form>
