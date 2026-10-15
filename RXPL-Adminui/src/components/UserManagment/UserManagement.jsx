@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import {
   FaUsers,
   FaUserTie,
@@ -12,79 +13,19 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaUserShield,
+  FaUserCheck,
 } from "react-icons/fa";
 import "./UserManagement.css";
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
 import BackGroundImg from "../../assets/bg.png";
 
-const INITIAL_USERS = [
-  {
-    id: 1,
-    name: "Linux Admin",
-    username: "linuxadmin",
-    email: "admin@rxpl.com",
-    phone: "",
-    role: "HO",
-    managerId: null,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Amit Sharma",
-    username: "amit.tlm",
-    email: "amit@rxpl.com",
-    phone: "",
-    role: "TLM",
-    managerId: 1,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Rahul Patil",
-    username: "rahul.slm",
-    email: "rahul@rxpl.com",
-    phone: "",
-    role: "SLM",
-    managerId: 2,
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Suresh Kumar",
-    username: "suresh.flm",
-    email: "suresh@rxpl.com",
-    phone: "",
-    role: "FLM",
-    managerId: 3,
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Akash Dutta",
-    username: "akash.mr",
-    email: "akash@rxpl.com",
-    phone: "",
-    role: "MR",
-    managerId: 4,
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "Priya Singh",
-    username: "priya.mr",
-    email: "priya@rxpl.com",
-    phone: "",
-    role: "MR",
-    managerId: 4,
-    status: "Inactive",
-  },
-];
+const API_BASE_URL = `http://${window.location.hostname}:7501/api`;
 
-const ROLES = ["HO", "TLM", "SLM", "FLM", "MR"];
+
+const ROLES = ["TLM", "SLM", "FLM", "MR"];
 
 const ROLE_LABELS = {
-  HO: "Head Office",
   TLM: "TLM",
   SLM: "SLM",
   FLM: "FLM",
@@ -99,6 +40,8 @@ const EMPTY_FORM = {
   hq: "",
   region: "",
   zone: "",
+  teamName: "",
+  businessUnit: "",
   managerId: "",
   status: "Active",
 };
@@ -110,24 +53,110 @@ const getAllowedManagerRoles = (role) => {
 
 const UserManagement = () => {
   const pageName = "User Management";
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState([]);
+  const [viewMode, setViewMode] = useState("active");
+  const [reactivatingId, setReactivatingId] = useState(null);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadingMoreMrs, setLoadingMoreMrs] = useState(false);
+  const [mrPagination, setMrPagination] = useState({ mrPage: 1, mrLimit: 50, totalMRs: 0, totalMRPages: 0, hasMoreMRs: false });
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("All");
+  const [roleFilter, setRoleFilter] = useState("MR");
+  const [tablePage, setTablePage] = useState(1);
+  const TABLE_PAGE_SIZE = 10;
   const [statusFilter, setStatusFilter] = useState("All");
   const [activeTab, setActiveTab] = useState("users");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState("");
+  const [savingUser, setSavingUser] = useState(false);
   const [parentSearch, setParentSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
-  const [expandedIds, setExpandedIds] = useState([1, 2, 3, 4]);
+  const [deactivating, setDeactivating] = useState(false);
+  const [deactivationError, setDeactivationError] = useState("");
+  const [expandedIds, setExpandedIds] = useState([]);
 
-  const getUser = (id) => users.find((user) => user.id === Number(id));
+  const loadUsers = async (mode = viewMode) => {
+    setLoadingUsers(true);
+    setLoadError("");
+    try {
+      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: 1, mrLimit: 50, status: mode } });
+      if (!response.data?.success || !Array.isArray(response.data.users)) {
+        throw new Error(response.data?.message || "The server returned an invalid users response.");
+      }
+      setUsers(response.data.users);
+      setMrPagination(response.data.pagination || { mrPage: 1, mrLimit: 50, totalMRs: response.data.users.filter((user) => user.role === "MR").length, totalMRPages: 1, hasMoreMRs: false });
+      setExpandedIds(response.data.users.filter((user) => user.role === "TLM").map((user) => user.id));
+    } catch (error) {
+      setLoadError(error.response?.data?.message || error.message || "Could not load users from the server.");
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => { loadUsers(); }, []);
+
+  const loadMoreMrs = async () => {
+    if (loadingMoreMrs || !mrPagination.hasMoreMRs) return;
+    setLoadingMoreMrs(true);
+    setLoadError("");
+    try {
+      const nextPage = mrPagination.mrPage + 1;
+      const response = await axios.get(`${API_BASE_URL}/hierarchy/users`, { params: { mrPage: nextPage, mrLimit: mrPagination.mrLimit || 50, status: viewMode } });
+      if (!response.data?.success || !Array.isArray(response.data.users)) {
+        throw new Error(response.data?.message || "The server returned an invalid users response.");
+      }
+      const nextMrs = response.data.users.filter((user) => user.role === "MR");
+      setUsers((previous) => [...previous.filter((user) => user.role !== "MR"), ...previous.filter((user) => user.role === "MR"), ...nextMrs]);
+      setMrPagination(response.data.pagination || { ...mrPagination, mrPage: nextPage, hasMoreMRs: false });
+    } catch (error) {
+      setLoadError(error.response?.data?.message || error.message || "Could not load more medical representatives.");
+    } finally {
+      setLoadingMoreMrs(false);
+    }
+  };
+
+  const getUser = (id) => users.find((user) => String(user.id) === String(id));
+
+  const switchView = async (mode) => {
+    setViewMode(mode);
+    setActiveTab("users");
+    setSearch("");
+    setStatusFilter("All");
+    setRoleFilter(mode === "inactive" ? "All" : "MR");
+    setTablePage(1);
+    await loadUsers(mode);
+  };
+
+  const reactivateUser = async (user) => {
+    if (!user || reactivatingId) return;
+    try {
+      setReactivatingId(user.id);
+      setLoadError("");
+      const response = await axios.patch(API_BASE_URL + "/hierarchy/users/" + user.role + "/" + user.id + "/activate");
+      if (!response.data?.success) throw new Error(response.data?.message || "The server did not reactivate this user.");
+      await loadUsers("inactive");
+    } catch (error) {
+      setLoadError(error.response?.data?.message || error.message || "Failed to reactivate user.");
+    } finally {
+      setReactivatingId(null);
+    }
+  };
 
   const getManagerName = (managerId) => {
     if (!managerId) return "—";
     return getUser(managerId)?.name || "Unassigned";
+  };
+
+  const formatDeactivatedAt = (value) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "—";
+    return date.toLocaleString(undefined, {
+      year: "numeric", month: "short", day: "2-digit",
+      hour: "2-digit", minute: "2-digit",
+    });
   };
 
   const filteredUsers = useMemo(() => {
@@ -143,16 +172,19 @@ const UserManagement = () => {
               .includes(query),
         );
 
-      const matchesRole = roleFilter === "All" || user.role === roleFilter;
+      const matchesRole = (viewMode === "inactive" && roleFilter === "All") || user.role === roleFilter;
 
       const matchesStatus =
         statusFilter === "All" || user.status === statusFilter;
 
       return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [users, search, roleFilter, statusFilter]);
+  }, [users, search, roleFilter, statusFilter, viewMode]);
 
   const activeCount = users.filter((user) => user.status === "Active").length;
+  const tablePageCount = Math.max(1, Math.ceil(filteredUsers.length / TABLE_PAGE_SIZE));
+  const paginatedUsers = filteredUsers.slice((tablePage - 1) * TABLE_PAGE_SIZE, tablePage * TABLE_PAGE_SIZE);
+  useEffect(() => { setTablePage(1); }, [roleFilter, search, statusFilter]);
 
   const openAddModal = () => {
     setEditingId(null);
@@ -166,12 +198,14 @@ const UserManagement = () => {
     setEditingId(user.id);
     setForm({
       role: user.role,
-      userId: user.username || "",
+      userId: user.userId || user.username || "",
       name: user.name,
       password: user.password || "",
       hq: user.hq || "",
       region: user.region || "",
       zone: user.zone || "",
+      teamName: user.teamName || "",
+      businessUnit: user.businessUnit || "",
       managerId: user.managerId ? String(user.managerId) : "",
       status: user.status,
     });
@@ -205,7 +239,7 @@ const UserManagement = () => {
 
     return users.filter((user) => {
       if (!allowedRoles.includes(user.role)) return false;
-      if (user.id === editingId) return false;
+      if (String(user.id) === String(editingId)) return false;
 
       // Do not allow a user to report to one of their own descendants.
       if (editingId && isDescendant(user.id, editingId)) return false;
@@ -216,108 +250,86 @@ const UserManagement = () => {
 
   const isDescendant = (candidateId, parentId) => {
     const children = users.filter(
-      (user) => Number(user.managerId) === Number(parentId),
+      (user) => String(user.managerId) === String(parentId),
     );
 
     return children.some(
       (child) =>
-        child.id === Number(candidateId) || isDescendant(candidateId, child.id),
+        String(child.id) === String(candidateId) || isDescendant(candidateId, child.id),
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (savingUser) return;
 
     const name = form.name.trim();
     const userId = form.userId.trim();
-    const password = form.password.trim();
-
-    if (!name || !userId || !password || !form.hq.trim() || !form.region.trim() || !form.zone.trim()) {
-      setFormError("Please complete all required account and location details.");
+    if (!name || !userId || !form.hq.trim() || !form.zone.trim() || (form.role !== "TLM" && !form.region.trim()) || (form.role === "MR" && !form.teamName.trim())) {
+      setFormError("Please complete the required ID, name, HQ, zone, region, and MR team name fields.");
       return;
     }
 
     const duplicateUserId = users.some(
-      (user) =>
-        String(user.username || "").toLowerCase() === userId.toLowerCase() &&
-        user.id !== editingId,
+      (user) => String(user.userId || user.username || "").toLowerCase() === userId.toLowerCase()
+        && String(user.id) !== String(editingId),
     );
-
     if (duplicateUserId) {
       setFormError("This ID is already in use.");
       return;
     }
 
-    const managerId = form.managerId ? Number(form.managerId) : null;
+    const managerId = form.role === "TLM" ? null : form.managerId;
     const allowedRoles = getAllowedManagerRoles(form.role);
-
-    if (managerId) {
+    if (form.role !== "TLM") {
       const manager = getUser(managerId);
-
-      if (
-        !manager ||
-        !allowedRoles.includes(manager.role) ||
-        manager.id === editingId ||
-        (editingId && isDescendant(managerId, editingId))
-      ) {
+      if (!manager || !allowedRoles.includes(manager.role) || String(manager.id) === String(editingId)
+        || (editingId && isDescendant(managerId, editingId))) {
         setFormError("Please select a valid reporting manager.");
         return;
       }
     }
 
-    if (form.role !== "HO" && !managerId) {
-      setFormError("Please select a reporting manager for this role.");
-      return;
-    }
-
-    const userData = {
-      name,
-      username: userId,
-      password,
-      hq: form.hq.trim(),
-      region: form.region.trim(),
-      zone: form.zone.trim(),
-      role: form.role,
-      managerId,
-      status: form.status,
-    };
-
-    if (editingId) {
-      setUsers((previous) =>
-        previous.map((user) =>
-          user.id === editingId ? { ...user, ...userData } : user,
-        ),
-      );
-    } else {
-      const newUser = {
-        id: Math.max(0, ...users.map((user) => user.id)) + 1,
-        ...userData,
+    try {
+      setSavingUser(true);
+      setFormError("");
+      const payload = {
+        role: form.role, userId, name, password: form.password,
+        hq: form.hq.trim(), region: form.region.trim(), zone: form.zone.trim(),
+        businessUnit: form.businessUnit || "", teamName: form.teamName.trim(), parentId: managerId, status: form.status,
       };
-
-      setUsers((previous) => [...previous, newUser]);
+      if (editingId) {
+        await axios.put(`${API_BASE_URL}/hierarchy/users/${form.role}/${editingId}`, payload);
+      } else {
+        await axios.post(`${API_BASE_URL}/hierarchy/users`, payload);
+      }
+      await loadUsers();
+      closeModal();
+    } catch (error) {
+      setFormError(error.response?.data?.message || error.message || "Failed to save user changes.");
+    } finally {
+      setSavingUser(false);
     }
-
-    closeModal();
   };
 
-  const confirmDelete = () => {
-    if (!deleteId) return;
-
-    // Prevent deleting a manager while they still have direct reports.
-    const hasReports = users.some(
-      (user) => Number(user.managerId) === Number(deleteId),
-    );
-
-    if (hasReports) {
-      window.alert(
-        "This user has direct reports. Reassign those users before deleting this account.",
-      );
+  const confirmDelete = async () => {
+    if (!deleteId || deactivating) return;
+    const user = getUser(deleteId);
+    if (!user) { setDeleteId(null); return; }
+    try {
+      setDeactivating(true);
+      setDeactivationError("");
+      setLoadError("");
+      const response = await axios.patch(`${API_BASE_URL}/hierarchy/users/${user.role}/${user.id}/deactivate`);
+      if (!response.data?.success) throw new Error(response.data?.message || "The server did not deactivate this user.");
+      setUsers((previous) => previous.map((item) => String(item.id) === String(user.id) ? { ...item, status: "Inactive" } : item));
       setDeleteId(null);
-      return;
+      await loadUsers();
+    } catch (error) {
+      setDeactivationError(error.response?.data?.message || error.message || "Failed to mark user inactive.");
+    } finally {
+      setDeactivating(false);
     }
-
-    setUsers((previous) => previous.filter((user) => user.id !== deleteId));
-    setDeleteId(null);
   };
 
   const toggleExpanded = (id) => {
@@ -330,7 +342,7 @@ const UserManagement = () => {
 
   const renderTree = (managerId, depth = 0, visited = new Set()) => {
     const children = users.filter(
-      (user) => Number(user.managerId) === Number(managerId),
+      (user) => String(user.managerId) === String(managerId),
     );
 
     return children.map((user) => {
@@ -340,7 +352,7 @@ const UserManagement = () => {
       nextVisited.add(user.id);
 
       const hasChildren = users.some(
-        (item) => Number(item.managerId) === user.id,
+        (item) => String(item.managerId) === String(user.id),
       );
       const expanded = expandedIds.includes(user.id);
 
@@ -429,24 +441,32 @@ const UserManagement = () => {
       <div className="um-page-header">
         <div>
           <div className="um-breadcrumb">Administration / Users</div>
-          <h1>User Management</h1>
-          <p>Manage users, reporting relationships, and account status.</p>
+          <h1>{viewMode === "inactive" ? "Inactive Users" : "User Management"}</h1>
+          <p>{viewMode === "inactive" ? "Review inactive accounts and reactivate users when needed." : "Manage active users, reporting relationships, and account status."}</p>
         </div>
 
-        <button type="button" className="um-primary-btn" onClick={openAddModal}>
-          <FaUserPlus />
-          <span>Add User</span>
-        </button>
+        <div className="um-page-header-actions">
+          <button type="button" className="um-secondary-btn" onClick={() => switchView(viewMode === "active" ? "inactive" : "active")}>
+            <FaUserCheck />
+            <span>{viewMode === "active" ? "View Inactive Users" : "Back to Active Users"}</span>
+          </button>
+          {viewMode === "active" && (
+            <button type="button" className="um-primary-btn" onClick={openAddModal}>
+              <FaUserPlus />
+              <span>Add User</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="um-stat-grid">
+      {viewMode === "active" && <div className="um-stat-grid">
         <div className="um-stat-card">
           <div className="um-stat-icon purple">
             <FaUsers />
           </div>
           <div>
             <span>Total Users</span>
-            <strong>{users.length}</strong>
+            <strong>{users.length - users.filter((user) => user.role === "MR").length + mrPagination.totalMRs}</strong>
           </div>
         </div>
 
@@ -469,7 +489,7 @@ const UserManagement = () => {
             <strong>
               {
                 users.filter((user) =>
-                  ["HO", "TLM", "SLM", "FLM"].includes(user.role),
+                  ["TLM", "SLM", "FLM"].includes(user.role),
                 ).length
               }
             </strong>
@@ -482,11 +502,13 @@ const UserManagement = () => {
           </div>
           <div>
             <span>Medical Representatives</span>
-            <strong>{users.filter((user) => user.role === "MR").length}</strong>
+            <strong>{mrPagination.totalMRs || users.filter((user) => user.role === "MR").length}</strong>
           </div>
         </div>
-      </div>
+      </div>}
 
+      {loadingUsers && <div className="um-loading-state">Loading users from the database…</div>}
+      {loadError && <div className="um-load-error"><span>{loadError}</span><button type="button" className="um-secondary-btn" onClick={loadUsers}>Retry</button></div>}
       <div className="um-main-card">
         <div className="um-tabs">
           <button
@@ -498,14 +520,16 @@ const UserManagement = () => {
             Users
           </button>
 
-          <button
-            type="button"
-            className={activeTab === "hierarchy" ? "active" : ""}
-            onClick={() => setActiveTab("hierarchy")}
-          >
-            <FaSitemap />
-            Hierarchy
-          </button>
+          {viewMode === "active" && (
+            <button
+              type="button"
+              className={activeTab === "hierarchy" ? "active" : ""}
+              onClick={() => setActiveTab("hierarchy")}
+            >
+              <FaSitemap />
+              Hierarchy
+            </button>
+          )}
         </div>
 
         {activeTab === "users" ? (
@@ -530,36 +554,33 @@ const UserManagement = () => {
                 )}
               </div>
 
-              <div className="um-filters">
-                <select
-                  value={roleFilter}
-                  onChange={(event) => setRoleFilter(event.target.value)}
-                  aria-label="Filter by role"
-                >
-                  <option value="All">All Roles</option>
-                  {ROLES.map((role) => (
-                    <option value={role} key={role}>
-                      {ROLE_LABELS[role]}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value)}
-                  aria-label="Filter by status"
-                >
-                  <option value="All">All Statuses</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
+              <div className="um-role-toggle" role="group" aria-label="Choose user role">
+                {viewMode === "inactive" && (
+                  <button type="button" className={roleFilter === "All" ? "active" : ""} aria-pressed={roleFilter === "All"} onClick={() => setRoleFilter("All")}>All</button>
+                )}
+                {ROLES.map((role) => (
+                  <button type="button" key={role} className={roleFilter === role ? "active" : ""} aria-pressed={roleFilter === role} onClick={() => setRoleFilter(role)}>
+                    {ROLE_LABELS[role]}
+                  </button>
+                ))}
               </div>
+              {viewMode === "active" && (
+                <div className="um-filters">
+                  <select
+                    value={statusFilter}
+                    onChange={(event) => setStatusFilter(event.target.value)}
+                    aria-label="Filter by status"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Active">Active</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="um-table-info">
               <span>
-                Showing <strong>{filteredUsers.length}</strong> of{" "}
-                <strong>{users.length}</strong> users
+                Showing <strong>{filteredUsers.length}</strong> {roleFilter} users
               </span>
             </div>
 
@@ -573,12 +594,13 @@ const UserManagement = () => {
                     <th>Email</th>
                     <th>Reports To</th>
                     <th>Status</th>
+                    {viewMode === "inactive" && <th>Deactivated At</th>}
                     <th>Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {filteredUsers.map((user) => (
+                  {paginatedUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
                         <div className="um-user-cell">
@@ -617,44 +639,67 @@ const UserManagement = () => {
                         </span>
                       </td>
 
+                      {viewMode === "inactive" && (
+                        <td>{formatDeactivatedAt(user.deactivatedAt)}</td>
+                      )}
+
                       <td>
                         <div className="um-actions">
-                          <button
-                            type="button"
-                            className="um-icon-btn edit"
-                            title="Edit user"
-                            onClick={() => openEditModal(user)}
-                          >
-                            <FaEdit />
-                          </button>
-
-                          <button
-                            type="button"
-                            className="um-icon-btn delete"
-                            title="Delete user"
-                            onClick={() => setDeleteId(user.id)}
-                          >
-                            <FaTrash />
-                          </button>
+                          {viewMode === "inactive" ? (
+                            <button type="button" className="um-icon-btn edit" title="Reactivate user" onClick={() => reactivateUser(user)} disabled={reactivatingId === user.id}>
+                              <FaUserCheck />
+                            </button>
+                          ) : (
+                            <>
+                              <button type="button" className="um-icon-btn edit" title="Edit user" onClick={() => openEditModal(user)}><FaEdit /></button>
+                              <button type="button" className="um-icon-btn delete" title="Mark user inactive" onClick={() => { setDeactivationError(""); setDeleteId(user.id); }}><FaTrash /></button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
                   ))}
 
-                  {filteredUsers.length === 0 && (
+                  {!loadingUsers && !loadingMoreMrs && paginatedUsers.length === 0 && (
                     <tr>
-                      <td colSpan="7">
+                      <td colSpan={viewMode === "inactive" ? 8 : 7}>
                         <div className="um-empty-state">
-                          <FaUsers />
+                          <FaSearch />
                           <strong>No users found</strong>
                           <span>Try changing your search or filters.</span>
                         </div>
                       </td>
                     </tr>
                   )}
+                  {(loadingUsers || loadingMoreMrs) && paginatedUsers.length === 0 && (
+                    <tr>
+                      <td colSpan="7">
+                        <div className="um-table-loading" role="status" aria-live="polite">
+                          <span className="um-loading-spinner" />
+                          <strong>Loading users…</strong>
+                          <span>Fetching the latest user records.</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}}
                 </tbody>
               </table>
             </div>
+            <div className="um-pagination-controls">
+              <span>Page {tablePage} of {tablePageCount} · {filteredUsers.length} {roleFilter} users</span>
+              <div className="um-pagination-buttons">
+                <button type="button" className="um-secondary-btn" onClick={() => setTablePage((page) => Math.max(1, page - 1))} disabled={tablePage <= 1}>Previous</button>
+                <button type="button" className="um-secondary-btn" onClick={() => setTablePage((page) => Math.min(tablePageCount, page + 1))} disabled={tablePage >= tablePageCount}>Next</button>
+              </div>
+            </div>
+            {(roleFilter === "MR" || (viewMode === "inactive" && roleFilter === "All")) && mrPagination.hasMoreMRs && (
+              <div className="um-pagination-controls">
+                <span>Loaded {users.filter((user) => user.role === "MR").length} of {mrPagination.totalMRs} medical representatives</span>
+                <button type="button" className="um-secondary-btn" onClick={loadMoreMrs} disabled={loadingMoreMrs}>
+                  {loadingMoreMrs ? "Loading..." : "Load Next 50 MRs"}
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <div className="um-hierarchy">
@@ -663,43 +708,26 @@ const UserManagement = () => {
                 <h3>Organization Hierarchy</h3>
                 <p>Expand a manager to view their direct reports and teams.</p>
               </div>
-              <span>{users.length} users</span>
+              <span>{users.length - users.filter((user) => user.role === "MR").length + mrPagination.totalMRs} users</span>
             </div>
 
             <div className="um-tree">
-              {users
-                .filter((user) => user.role === "HO" && !user.managerId)
-                .map((headOffice) => (
-                  <div className="um-tree-root" key={headOffice.id}>
-                    <div className="um-tree-node um-tree-root-node">
-                      <div className="um-tree-avatar root-avatar">
-                        <FaUserShield />
-                      </div>
-                      <div className="um-tree-user">
-                        <strong>{headOffice.name}</strong>
-                        <span>{headOffice.username}</span>
-                      </div>
-                      <span className="um-role-badge role-ho">HO</span>
-                      <button
-                        type="button"
-                        className="um-icon-btn"
-                        title="Edit user"
-                        onClick={() => openEditModal(headOffice)}
-                      >
-                        <FaEdit />
-                      </button>
-                    </div>
+              {renderTree(null, 0, new Set())}
 
-                    {renderTree(headOffice.id, 0, new Set([headOffice.id]))}
-                  </div>
-                ))}
-
-              {users.some((user) => user.role !== "HO" && !user.managerId) && (
+              {users.some((user) => user.role !== "TLM" && !user.managerId) && (
                 <div className="um-unassigned">
                   Some users do not have a reporting manager assigned.
                 </div>
               )}
             </div>
+            {mrPagination.hasMoreMRs && (
+              <div className="um-pagination-controls">
+                <span>Loaded {users.filter((user) => user.role === "MR").length} of {mrPagination.totalMRs} medical representatives</span>
+                <button type="button" className="um-secondary-btn" onClick={loadMoreMrs} disabled={loadingMoreMrs}>
+                  {loadingMoreMrs ? "Loading..." : "Next 50 MRs"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -746,10 +774,11 @@ const UserManagement = () => {
                   <select
                     value={form.role}
                     onChange={(event) => updateForm("role", event.target.value)}
+                    disabled={Boolean(editingId)}
                   >
                     {ROLES.map((role) => (
                       <option value={role} key={role}>
-                        {ROLE_LABELS[role]}{role !== "HO" ? ` (${role})` : ""}
+                        {ROLE_LABELS[role]} ({role})
                       </option>
                     ))}
                   </select>
@@ -781,7 +810,7 @@ const UserManagement = () => {
                     type="password"
                     value={form.password}
                     onChange={(event) => updateForm("password", event.target.value)}
-                    placeholder="Enter password"
+                    placeholder="Leave blank to keep current password"
                     required={!editingId}
                   />
                 </label>
@@ -797,12 +826,12 @@ const UserManagement = () => {
                 </label>
 
                 <label>
-                  Region <span>*</span>
+                  Region {form.role !== "TLM" && <span>*</span>}
                   <input
                     value={form.region}
                     onChange={(event) => updateForm("region", event.target.value)}
                     placeholder="Region"
-                    required
+                    required={form.role !== "TLM"}
                   />
                 </label>
 
@@ -816,24 +845,36 @@ const UserManagement = () => {
                   />
                 </label>
 
+                {form.role === "MR" && (
+                  <label>
+                    Team Name <span>*</span>
+                    <input
+                      value={form.teamName}
+                      onChange={(event) => updateForm("teamName", event.target.value)}
+                      placeholder="Enter team name"
+                      required
+                    />
+                  </label>
+                )}
+
                 <label className="um-parent-field">
-                  {form.role === "HO" ? "Parent ID" : `Parent ${ROLES[ROLES.indexOf(form.role) - 1]} ID`}
+                  {form.role === "TLM" ? "Parent" : `Parent ${ROLES[ROLES.indexOf(form.role) - 1]} ID`}
                   <input
                     type="search"
                     className="um-parent-search"
                     value={parentSearch}
                     onChange={(event) => setParentSearch(event.target.value)}
                     placeholder="Search parent by ID or name"
-                    disabled={form.role === "HO"}
+                    disabled={form.role === "TLM"}
                   />
                   <select
                     value={form.managerId}
                     onChange={(event) => updateForm("managerId", event.target.value)}
-                    disabled={form.role === "HO"}
-                    required={form.role !== "HO"}
+                    disabled={form.role === "TLM"}
+                    required={form.role !== "TLM"}
                   >
                     <option value="">
-                      {form.role === "HO" ? "Not applicable" : "Select parent"}
+                      {form.role === "TLM" ? "TLM users are at the top level" : "Select parent"}
                     </option>
                     {getEligibleManagers().filter((manager) => `${manager.username || ""} ${manager.name} ${manager.role}`.toLowerCase().includes(parentSearch.trim().toLowerCase())).map((manager) => (
                       <option key={manager.id} value={manager.id}>
@@ -858,11 +899,11 @@ const UserManagement = () => {
               {formError && <div className="um-form-error">{formError}</div>}
 
               <div className="um-modal-footer">
-                <button type="button" className="um-secondary-btn" onClick={closeModal}>
+                <button type="button" className="um-secondary-btn" onClick={closeModal} disabled={savingUser}>
                   Cancel
                 </button>
-                <button type="submit" className="um-primary-btn">
-                  {editingId ? "Save Changes" : "Create User"}
+                <button type="submit" className="um-primary-btn" disabled={savingUser} aria-busy={savingUser}>
+                  {savingUser ? <><span className="um-loading-spinner" aria-hidden="true" /> {editingId ? "Saving..." : "Creating..."}</> : (editingId ? "Save Changes" : "Create User")}
                 </button>
               </div>
             </form>
@@ -882,17 +923,19 @@ const UserManagement = () => {
               <FaTrash />
             </div>
 
-            <h2>Delete User?</h2>
+            <h2>Deactivate User?</h2>
             <p>
-              Are you sure you want to delete{" "}
-              <strong>{getUser(deleteId)?.name}</strong>? This action removes
-              the user from this page.
+              Are you sure you want to mark{" "}
+              <strong>{getUser(deleteId)?.name}</strong> as inactive? The account will be retained in the database.
             </p>
+
+            {deactivationError && <div className="um-form-error" role="alert">{deactivationError}</div>}
 
             <div className="um-modal-footer">
               <button
                 type="button"
                 className="um-secondary-btn"
+                disabled={deactivating}
                 onClick={() => setDeleteId(null)}
               >
                 Cancel
@@ -902,8 +945,9 @@ const UserManagement = () => {
                 type="button"
                 className="um-danger-btn"
                 onClick={confirmDelete}
+                disabled={deactivating}
               >
-                Delete User
+                {deactivating ? "Deactivating..." : "Confirm Deactivation"}
               </button>
             </div>
           </div>

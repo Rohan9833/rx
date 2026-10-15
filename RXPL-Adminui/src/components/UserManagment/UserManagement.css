@@ -1015,3 +1015,281 @@
     grid-column: auto;
   }
 }
+
+
+/* Role selector and table pagination controls. */
+.um-role-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #e4e0ef;
+  border-radius: 12px;
+  background: #f8f7fc;
+  flex-wrap: wrap;
+}
+
+.um-role-toggle button {
+  min-width: 58px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #625b75;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.um-role-toggle button.active {
+  color: #fff;
+  background: #7415e8;
+  box-shadow: 0 2px 8px rgba(116, 21, 232, 0.2);
+}
+
+.um-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 22px;
+  border-top: 1px solid #efedf5;
+  color: #777188;
+  font-size: 13px;
+}
+
+.um-pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.um-pagination-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 680px) {
+  .um-role-toggle {
+    width: 100%;
+  }
+
+  .um-role-toggle button {
+    flex: 1;
+    padding-inline: 9px;
+  }
+
+  .um-pagination-controls {
+    padding: 12px 14px;
+  }
+}
+
+/* Actions in the User Management page header. */
+.um-page-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.um-page-header-actions .um-secondary-btn,
+.um-page-header-actions .um-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (max-width: 620px) {
+  .um-page-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .um-page-header-actions button {
+    flex: 1;
+  }
+}
+
+/* User Management visual alignment with the existing RXPL leaderboard theme. */
+.user-management-page {
+  background: #fff;
+  color: #242033;
+  padding: 20px 24px 26px;
+}
+
+.um-page-header {
+  margin-bottom: 20px;
+  padding: 0 2px;
+}
+
+.um-page-header h1 {
+  color: #4b0bc6;
+  font-size: 24px;
+  letter-spacing: -0.35px;
+}
+
+.um-breadcrumb { color: #77758a; }
+.um-page-header p { color: #77758a; }
+
+.um-primary-btn {
+  background: linear-gradient(110deg, #6516dc, #d4149b);
+  border-radius: 20px;
+  box-shadow: 0 3px 9px rgb(116 12 193 / 16%);
+}
+
+.um-secondary-btn {
+  border-radius: 20px;
+  background: #f4f0fa;
+  color: #4b287c;
+}
+
+.um-stat-grid { gap: 14px; margin-bottom: 20px; }
+
+.um-stat-card {
+  border-color: #f0edf4;
+  border-radius: 10px;
+  box-shadow: 0 2px 7px rgb(36 20 52 / 8%);
+  padding: 17px 19px;
+}
+
+.um-stat-card strong { color: #7923d0; }
+
+.um-main-card {
+  border: 1px solid #ff2c93;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.um-tabs {
+  padding: 0 22px;
+  background: #fff;
+  border-bottom-color: #eadfea;
+}
+
+.um-tabs button.active {
+  color: #6a12ce;
+  border-bottom-color: #e91e91;
+}
+
+.um-toolbar { padding: 16px 20px 12px; }
+
+.um-search,
+.um-filters select { border-radius: 6px; }
+
+.um-role-toggle {
+  border-radius: 22px;
+  background: #faf5fb;
+  border-color: #eee0f0;
+}
+
+.um-role-toggle button.active {
+  background: linear-gradient(110deg, #6d16dc, #b517c5);
+  box-shadow: 0 2px 7px rgb(110 22 220 / 20%);
+}
+
+.um-table thead { background: #fff; }
+
+.um-table th {
+  color: #8d5b00;
+  border-top-color: #d8d5df;
+  border-bottom-color: #d8d5df;
+  font-size: 10px;
+}
+
+.um-table td {
+  color: #242033;
+  border-bottom-color: #fff;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+.um-table tbody tr:nth-child(odd) { background: #f8cce8; }
+.um-table tbody tr:nth-child(even) { background: #fce7f4; }
+.um-table tbody tr:hover { background: #f4b9df; }
+
+.um-user-cell strong { color: #242033; }
+.um-status { border-radius: 5px; }
+
+.um-pagination-controls {
+  border-top: 1px solid #eee4ee;
+  background: #fff;
+}
+
+.um-icon-btn { border-radius: 6px; }
+
+.um-tree-node { border-radius: 7px; box-shadow: 0 1px 4px rgb(36 20 52 / 5%); }
+.um-tree-root-node { border-color: #f0b7dc; background: #fff6fb; }
+
+@media (max-width: 900px) {
+  .user-management-page { padding: 16px; }
+  .um-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .user-management-page { padding: 12px; }
+  .um-page-header { align-items: flex-start; }
+  .um-page-header h1 { font-size: 21px; }
+  .um-page-header-actions { justify-content: flex-start; }
+  .um-page-header-actions button { min-height: 36px; padding: 8px 11px; font-size: 11px; }
+  .um-stat-grid { gap: 9px; }
+  .um-stat-card { padding: 12px; gap: 9px; }
+  .um-stat-icon { width: 36px; height: 36px; flex-basis: 36px; font-size: 16px; }
+  .um-stat-card strong { font-size: 20px; }
+  .um-tabs { gap: 20px; padding: 0 14px; }
+  .um-toolbar { padding: 13px; }
+  .um-search { min-width: 100%; max-width: none; }
+  .um-table th, .um-table td { padding-left: 12px; padding-right: 12px; }
+}
+
+.um-table-loading {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 28px 16px;
+  color: #77758a;
+  white-space: normal;
+  text-align: center;
+}
+
+.um-table-loading strong {
+  color: #4b0bc6;
+  font-size: 13px;
+}
+
+.um-table-loading > span:last-child {
+  font-size: 11px;
+}
+
+.um-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3d9ed;
+  border-top-color: #8b1bd1;
+  border-right-color: #e91e93;
+  border-radius: 50%;
+  animation: um-spin 0.75s linear infinite;
+}
+
+@keyframes um-spin {
+  to { transform: rotate(360deg); }
+}
+
+.um-loading-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px 15px;
+  border: 1px solid #f0d7ed;
+  border-radius: 8px;
+  background: #fff8fc;
+  color: #6f27b5;
+  font-size: 12px;
+}
