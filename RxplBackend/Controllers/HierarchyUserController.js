@@ -42,6 +42,7 @@ const updateHierarchyUser = async (req, res) => {
     const region = String(body.region ?? user.REGION ?? "").trim();
     const zone = String(body.zone ?? user.ZONE ?? "").trim();
     const businessUnit = String(body.businessUnit ?? user.BUSINESSUNIT ?? "").trim();
+    const teamName = String(body.teamName ?? user.TEAMNAME ?? "").trim();
 
     if (!idValue || !name || !hq || !zone) {
       return res.status(400).json({ success: false, message: "ID, name, HQ, and zone are required." });
@@ -66,6 +67,12 @@ const updateHierarchyUser = async (req, res) => {
       BUSINESSUNIT: businessUnit,
     };
     if (role !== "TLM") changes.REGION = region;
+    if (role === "MR") {
+      if (!teamName) {
+        return res.status(400).json({ success: false, message: "Team name is required for an MR." });
+      }
+      changes.TEAMNAME = teamName;
+    }
     if (password !== undefined && password !== null && String(password).length) {
       changes[role === "MR" ? "PASSWORD" : "Password"] = String(password);
     }
@@ -315,7 +322,7 @@ const getHierarchyUsers = async (req, res) => {
       runQuery("TLM", Tlm.find(activeQuery).select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm isActive").lean()),
       runQuery("SLM", Slm.find(activeQuery).select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm isActive").lean()),
       runQuery("FLM", Flm.find(activeQuery).select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs isActive").lean()),
-      runQuery("MR", Mr.find(activeQuery).sort({ _id: -1 }).skip(mrSkip).limit(mrLimit).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT isActive status").lean()),
+      runQuery("MR", Mr.find(activeQuery).sort({ _id: -1 }).skip(mrSkip).limit(mrLimit).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT TEAMNAME isActive status").lean()),
       runQuery("MR count", Mr.countDocuments(activeQuery)),
     ]);
 
@@ -354,6 +361,7 @@ const getHierarchyUsers = async (req, res) => {
         region: String(doc.REGION || ""),
         zone: String(doc.ZONE || ""),
         businessUnit: String(doc.BUSINESSUNIT || ""),
+        teamName: role === "MR" ? String(doc.TEAMNAME || "") : "",
         managerId: parent ? parent.id : null,
         managerRole: parent ? parent.role : null,
         managerName: parent ? parent.name : "",
