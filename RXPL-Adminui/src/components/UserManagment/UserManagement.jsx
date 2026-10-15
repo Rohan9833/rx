@@ -40,6 +40,8 @@ const EMPTY_FORM = {
   hq: "",
   region: "",
   zone: "",
+  teamName: "",
+  businessUnit: "",
   managerId: "",
   status: "Active",
 };
@@ -191,6 +193,8 @@ const UserManagement = () => {
       hq: user.hq || "",
       region: user.region || "",
       zone: user.zone || "",
+      teamName: user.teamName || "",
+      businessUnit: user.businessUnit || "",
       managerId: user.managerId ? String(user.managerId) : "",
       status: user.status,
     });
@@ -249,8 +253,8 @@ const UserManagement = () => {
 
     const name = form.name.trim();
     const userId = form.userId.trim();
-    if (!name || !userId || !form.hq.trim() || !form.zone.trim() || (form.role !== "TLM" && !form.region.trim())) {
-      setFormError("Please complete the required ID, name, HQ, zone, and region fields.");
+    if (!name || !userId || !form.hq.trim() || !form.zone.trim() || (form.role !== "TLM" && !form.region.trim()) || (form.role === "MR" && !form.teamName.trim())) {
+      setFormError("Please complete the required ID, name, HQ, zone, region, and MR team name fields.");
       return;
     }
 
@@ -279,7 +283,7 @@ const UserManagement = () => {
       const payload = {
         role: form.role, userId, name, password: form.password,
         hq: form.hq.trim(), region: form.region.trim(), zone: form.zone.trim(),
-        businessUnit: form.businessUnit || "", parentId: managerId, status: form.status,
+        businessUnit: form.businessUnit || "", teamName: form.teamName.trim(), parentId: managerId, status: form.status,
       };
       if (editingId) {
         await axios.put(`${API_BASE_URL}/hierarchy/users/${form.role}/${editingId}`, payload);
@@ -820,6 +824,18 @@ const UserManagement = () => {
                     required
                   />
                 </label>
+
+                {form.role === "MR" && (
+                  <label>
+                    Team Name <span>*</span>
+                    <input
+                      value={form.teamName}
+                      onChange={(event) => updateForm("teamName", event.target.value)}
+                      placeholder="Enter team name"
+                      required
+                    />
+                  </label>
+                )}
 
                 <label className="um-parent-field">
                   {form.role === "TLM" ? "Parent" : `Parent ${ROLES[ROLES.indexOf(form.role) - 1]} ID`}
