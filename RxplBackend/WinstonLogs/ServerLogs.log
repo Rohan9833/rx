@@ -353,3 +353,25 @@
 10-14-2026 16:39:23 [VERBOSE] PUT /hierarchy/users/MR/6acde8da79d18c7cf7c214c8 - 200  
 10-14-2026 16:39:23 [VERBOSE] 4244 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
 10-14-2026 16:39:23 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 12:47:32 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 12:47:32 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 12:49:53 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 12:49:53 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 12:50:28 [VERBOSE] 23964 POST /api/hierarchy/users : {"role":"MR","userId":"MR103","name":"Rohan","password":"12345","hq":"HO","region":"Region","zone":"Zone","businessUnit":"","teamName":"Team Name","parentId":"696f34c0a502375f27afac22","status":"Active"}
+10-15-2026 12:50:37 [VERBOSE] POST /hierarchy/users - 201  
+10-15-2026 12:50:37 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 12:50:37 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:00:55 [VERBOSE] 23964 GET /api/getMatchSchedules/Linux : {}
+10-15-2026 13:00:55 [VERBOSE] 23964 GET /api/getAllMatches : {}
+10-15-2026 13:00:55 [VERBOSE] GET /getAllMatches - 200  
+10-15-2026 13:00:57 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:00:57 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 13:01:01 [VERBOSE] GET /getMatchSchedules/Linux - 200  
+10-15-2026 13:01:01 [VERBOSE] 23964 GET /api/getMatchSchedules/Linux : {}
+10-15-2026 13:01:13 [VERBOSE] GET /getMatchSchedules/Linux - 304  
+10-15-2026 13:23:55 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:23:55 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:37:39 [VERBOSE] 23964 POST /api/hierarchy/users : {"role":"MR","userId":"MR111","name":"Rohan","password":"12345","hq":"HQ","region":"Region","zone":"Zone","businessUnit":"","teamName":"TELANGANATRAILBLAZERS","parentId":"696f34c4a502375f27afad5f","status":"Active"}
+10-15-2026 13:37:45 [VERBOSE] POST /hierarchy/users - 201  
+10-15-2026 13:37:45 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:37:45 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
