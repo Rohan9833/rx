@@ -375,3 +375,77 @@
 10-15-2026 13:37:45 [VERBOSE] POST /hierarchy/users - 201  
 10-15-2026 13:37:45 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
 10-15-2026 13:37:45 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:49:05 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:49:27 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 13:50:40 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:50:41 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:51:32 [VERBOSE] 23964 PATCH /api/hierarchy/users/MR/6ad089d162f32796dfa1db3f/deactivate : {}
+10-15-2026 13:51:36 [VERBOSE] PATCH /hierarchy/users/MR/6ad089d162f32796dfa1db3f/deactivate - 200  
+10-15-2026 13:51:36 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:51:36 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:51:38 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 13:51:38 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 200  
+10-15-2026 13:51:49 [VERBOSE] 23964 PATCH /api/hierarchy/users/MR/6acf5a48047a052371185632/activate : {}
+10-15-2026 13:51:50 [VERBOSE] PATCH /hierarchy/users/MR/6acf5a48047a052371185632/activate - 200  
+10-15-2026 13:51:50 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 13:51:50 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 200  
+10-15-2026 13:51:53 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:51:53 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:51:57 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:51:58 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:52:03 [VERBOSE] 23964 PATCH /api/hierarchy/users/MR/6acf5a48047a052371185632/deactivate : {}
+10-15-2026 13:52:09 [VERBOSE] PATCH /hierarchy/users/MR/6acf5a48047a052371185632/deactivate - 200  
+10-15-2026 13:52:09 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:52:09 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:52:13 [VERBOSE] 23964 PATCH /api/hierarchy/users/MR/6ad07ec462f32796df974808/deactivate : {}
+10-15-2026 13:52:13 [VERBOSE] PATCH /hierarchy/users/MR/6ad07ec462f32796df974808/deactivate - 200  
+10-15-2026 13:52:13 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:52:14 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:52:19 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:52:21 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 13:52:28 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 200  
+10-15-2026 13:52:28 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 13:52:59 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 13:52:59 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 13:53:11 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 13:53:19 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 304  
+10-15-2026 15:16:30 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:16:31 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 15:16:32 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 15:16:41 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 304  
+10-15-2026 15:16:55 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:16:55 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 15:16:56 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 15:16:57 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 304  
+10-15-2026 15:16:58 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:17:03 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 15:17:24 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 15:17:24 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:17:24 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 304  
+10-15-2026 15:17:24 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 15:17:24 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 304  
+10-15-2026 15:17:24 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 15:17:24 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:17:24 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 15:17:26 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 15:17:26 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 304  
+10-15-2026 15:17:28 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:17:28 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 15:17:35 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 15:17:35 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 304  
+10-15-2026 15:17:40 [VERBOSE] 23964 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:17:40 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
+10-15-2026 15:34:24 [VERBOSE] 17164 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:34:25 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 15:35:21 [VERBOSE] 17164 POST /api/hierarchy/users : {"role":"MR","userId":"mr101","name":"ROHAN","password":"12345","hq":"HQ","region":"REGION","zone":"ZONE","businessUnit":"","teamName":"TEAM","parentId":"696f34c3a502375f27afad35","status":"Active"}
+10-15-2026 15:35:40 [VERBOSE] POST /hierarchy/users - 201  
+10-15-2026 15:35:40 [VERBOSE] 17164 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:35:40 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 15:38:59 [VERBOSE] 17164 PATCH /api/hierarchy/users/MR/6ad0a5734b99e2d55655658a/deactivate : {}
+10-15-2026 15:38:59 [VERBOSE] PATCH /hierarchy/users/MR/6ad0a5734b99e2d55655658a/deactivate - 200  
+10-15-2026 15:38:59 [VERBOSE] 17164 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:38:59 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 200  
+10-15-2026 15:39:01 [VERBOSE] 17164 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=inactive : {}
+10-15-2026 15:39:02 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=inactive - 200  
+10-15-2026 15:39:24 [VERBOSE] 17164 GET /api/hierarchy/users?mrPage=1&mrLimit=50&status=active : {}
+10-15-2026 15:39:28 [VERBOSE] GET /hierarchy/users?mrPage=1&mrLimit=50&status=active - 304  
