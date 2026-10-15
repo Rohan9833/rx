@@ -128,6 +128,7 @@ const createHierarchyUser = async (req, res) => {
     const region = String(body.region || "").trim();
     const zone = String(body.zone || "").trim();
     let businessUnit = String(body.businessUnit || "").trim();
+    const teamName = String(body.teamName || "").trim();
 
     if (!userId || !name || !password || !hq || !zone || (role !== "TLM" && !region)) {
       return res.status(400).json({ success: false, message: "Please provide ID, name, password, HQ, zone, and region where required." });
@@ -162,6 +163,10 @@ const createHierarchyUser = async (req, res) => {
     }
 
     if (role === "MR") {
+      if (!teamName) {
+        return res.status(400).json({ success: false, message: "Team name is required for an MR." });
+      }
+      data.TEAMNAME = teamName;
       data.isActive = body.status !== "Inactive";
       data.matchSchedules = [];
 
@@ -187,11 +192,10 @@ const createHierarchyUser = async (req, res) => {
       // an MR that is currently in an active match.
       const activeMr = existingMrs.find((mr) => mr.isMatchOn === true);
       const configuredMr = activeMr || existingMrs.find((mr) =>
-        mr.State || mr.TEAMNAME || (mr.matchSchedules || []).length
+        mr.State || (mr.matchSchedules || []).length
       );
 
       if (configuredMr?.State) data.State = configuredMr.State;
-      if (configuredMr?.TEAMNAME) data.TEAMNAME = configuredMr.TEAMNAME;
 
       // Match participation metadata is shared only when a same-business-unit
       // MR is actively in a match. Never copy that MR's scores or prescriptions.
