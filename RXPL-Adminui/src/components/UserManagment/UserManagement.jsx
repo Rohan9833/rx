@@ -149,6 +149,16 @@ const UserManagement = () => {
     return getUser(managerId)?.name || "Unassigned";
   };
 
+  const formatDeactivatedAt = (value) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "—";
+    return date.toLocaleString(undefined, {
+      year: "numeric", month: "short", day: "2-digit",
+      hour: "2-digit", minute: "2-digit",
+    });
+  };
+
   const filteredUsers = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -584,6 +594,7 @@ const UserManagement = () => {
                     <th>Email</th>
                     <th>Reports To</th>
                     <th>Status</th>
+                    {viewMode === "inactive" && <th>Deactivated At</th>}
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -628,6 +639,10 @@ const UserManagement = () => {
                         </span>
                       </td>
 
+                      {viewMode === "inactive" && (
+                        <td>{formatDeactivatedAt(user.deactivatedAt)}</td>
+                      )}
+
                       <td>
                         <div className="um-actions">
                           {viewMode === "inactive" ? (
@@ -647,7 +662,7 @@ const UserManagement = () => {
 
                   {!loadingUsers && !loadingMoreMrs && paginatedUsers.length === 0 && (
                     <tr>
-                      <td colSpan="7">
+                      <td colSpan={viewMode === "inactive" ? 8 : 7}>
                         <div className="um-empty-state">
                           <FaSearch />
                           <strong>No users found</strong>

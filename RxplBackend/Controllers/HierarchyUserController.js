@@ -267,7 +267,11 @@ const deactivateHierarchyUser = async (req, res) => {
     const config = getByRole(role);
     if (!config) return res.status(400).json({ success: false, message: "Role must be TLM, SLM, FLM, or MR." });
     if (!isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid user record ID." });
-    const user = await config.model.findByIdAndUpdate(req.params.id, { $set: { isActive: false } }, { new: true, runValidators: true });
+    const user = await config.model.findByIdAndUpdate(
+      req.params.id,
+      { $set: { isActive: false, deactivatedAt: new Date() } },
+      { new: true, runValidators: true, strict: false },
+    );
     if (!user) return res.status(404).json({ success: false, message: "User not found." });
     return res.status(200).json({ success: true, message: role + " user marked inactive." });
   } catch (error) {
@@ -281,7 +285,11 @@ const activateHierarchyUser = async (req, res) => {
     const config = getByRole(role);
     if (!config) return res.status(400).json({ success: false, message: "Role must be TLM, SLM, FLM, or MR." });
     if (!isValidObjectId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid user record ID." });
-    const user = await config.model.findByIdAndUpdate(req.params.id, { $set: { isActive: true } }, { new: true, runValidators: true });
+    const user = await config.model.findByIdAndUpdate(
+      req.params.id,
+      { $set: { isActive: true, deactivatedAt: null } },
+      { new: true, runValidators: true, strict: false },
+    );
     if (!user) return res.status(404).json({ success: false, message: "User not found." });
     return res.status(200).json({ success: true, message: role + " user reactivated successfully." });
   } catch (error) {
@@ -319,10 +327,10 @@ const getHierarchyUsers = async (req, res) => {
     const mrSkip = (mrPage - 1) * mrLimit;
 
     const [tlms, slms, flms, mrs, totalMRs] = await Promise.all([
-      runQuery("TLM", Tlm.find(activeQuery).select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm isActive").lean()),
-      runQuery("SLM", Slm.find(activeQuery).select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm isActive").lean()),
-      runQuery("FLM", Flm.find(activeQuery).select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs isActive").lean()),
-      runQuery("MR", Mr.find(activeQuery).sort({ _id: -1 }).skip(mrSkip).limit(mrLimit).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT TEAMNAME isActive status").lean()),
+      runQuery("TLM", Tlm.find(activeQuery).select("_id TLMEmpID TLMName HQ ZONE BUSINESSUNIT Slm isActive deactivatedAt").lean()),
+      runQuery("SLM", Slm.find(activeQuery).select("_id SLMEmpID SLMName HQ REGION ZONE BUSINESSUNIT TLM Flm isActive deactivatedAt").lean()),
+      runQuery("FLM", Flm.find(activeQuery).select("_id FLMEmpID BDMName HQ REGION ZONE BUSINESSUNIT Flm Mrs isActive deactivatedAt").lean()),
+      runQuery("MR", Mr.find(activeQuery).sort({ _id: -1 }).skip(mrSkip).limit(mrLimit).setOptions({ strict: false }).select("_id MRID USERNAME EMAIL HQ REGION ZONE BUSINESSUNIT TEAMNAME isActive deactivatedAt status").lean()),
       runQuery("MR count", Mr.countDocuments(activeQuery)),
     ]);
 
@@ -366,6 +374,7 @@ const getHierarchyUsers = async (req, res) => {
         managerRole: parent ? parent.role : null,
         managerName: parent ? parent.name : "",
         status: doc.isActive === false ? "Inactive" : "Active",
+        deactivatedAt: doc.deactivatedAt || null,
       };
     });
 
