@@ -12,6 +12,7 @@ const tlmSchema = new mongoose.Schema(
       required: false,
     },
     isActive: { type: Boolean, default: true },
+    deactivatedAt: { type: Date, default: null },
     TLMName: {
       type: String,
       required: false,
