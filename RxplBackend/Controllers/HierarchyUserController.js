@@ -147,7 +147,49 @@ const createHierarchyUser = async (req, res) => {
       BUSINESSUNIT: businessUnit,
     };
     if (role !== "TLM") data.REGION = region;
-    if (role === "MR") data.isActive = body.status !== "Inactive";
+    if (role === "MR") {
+      data.isActive = body.status !== "Inactive";
+      data.matchSchedules = [];
+
+      // Match schedules are stored on each MR. Seed a new MR with the
+      // unique schedules already used by MRs in the same BUSINESSUNIT.
+      if (businessUnit) {
+        const existingMrs = await Mr.find({
+          BUSINESSUNIT: businessUnit,
+          "matchSchedules.0": { $exists: true },
+        })
+          .select("matchSchedules")
+          .lean();
+
+        const schedulesByKey = new Map();
+        for (const existingMr of existingMrs) {
+          for (const schedule of existingMr.matchSchedules || []) {
+            const key = [
+              schedule.startDate ? new Date(schedule.startDate).toISOString() : "",
+              schedule.endDate ? new Date(schedule.endDate).toISOString() : "",
+              schedule.createdAt ? new Date(schedule.createdAt).toISOString() : "",
+              String(schedule.createdBy || ""),
+            ].join("|");
+
+            if (!schedulesByKey.has(key)) {
+              schedulesByKey.set(key, {
+                startDate: schedule.startDate,
+                endDate: schedule.endDate,
+                isMatchOn: Boolean(schedule.isMatchOn),
+                createdAt: schedule.createdAt,
+                createdBy: schedule.createdBy,
+              });
+            }
+          }
+        }
+
+        data.matchSchedules = Array.from(schedulesByKey.values()).sort((a, b) => {
+          const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+          const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+          return dateA - dateB;
+        });
+      }
+    }
 
     let parent = null;
     if (config.parentRole) {
